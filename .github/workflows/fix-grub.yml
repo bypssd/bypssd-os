@@ -15,10 +15,11 @@ jobs:
         run: gh release download renacer-1.0-r7 --dir out/original-r7
       - name: Reparar GRUB sin recompilar ni modificar el sistema Linux
         run: |
+          set -o pipefail
           docker run --rm -v "$PWD:/workspace" -w /workspace registry.fedoraproject.org/fedora:45 bash scripts/repack-grub-r8.sh 2>&1 | tee out/repack-r8.log
       - name: Publicar las dos imágenes finales
         run: |
-          gh release create renacer-1.0-r8 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 8' --notes-file docs/release-r8.md
+          gh release view renacer-1.0-r8 >/dev/null 2>&1 || gh release create renacer-1.0-r8 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 8' --notes-file docs/release-r8.md
           gh release upload renacer-1.0-r8 out/publish-r8/*.iso out/publish-r8/*.sha256 out/publish-r8/*.json out/publish-r8/*.txt
       - name: Guardar el registro de validación
         if: always()

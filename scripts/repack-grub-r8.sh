@@ -2,7 +2,7 @@
 # Change only the x64 GRUB text configuration; preserve all RPM/EFI/kernel payloads.
 set -euo pipefail
 cd /workspace
-dnf -y --setopt=install_weak_deps=False install xorriso isomd5sum grub2-tools-minimal python3
+dnf -y --setopt=install_weak_deps=False install xorriso isomd5sum grub2-tools python3
 mkdir -p out/publish-r8 out/repack-tmp out/logs
 (cd out/original-r7 && sha256sum -c BYPSSD-OS-Renacer-1.0-aarch64.iso.sha256 && sha256sum -c BYPSSD-OS-Renacer-1.0-x86_64.iso.sha256)
 xorriso -osirrox on -indev out/original-r7/BYPSSD-OS-Renacer-1.0-x86_64.iso \
