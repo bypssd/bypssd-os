@@ -2,13 +2,14 @@
 """Issue one QMP command to the disposable BYPSSD test VM."""
 from pathlib import Path
 import json
+import os
 import socket
 import sys
 
 project = Path(__file__).resolve().parents[1]
 with socket.socket(socket.AF_UNIX) as sock:
     sock.settimeout(20)
-    sock.connect(str(project/'out/qemu-test/qmp.sock'))
+    sock.connect(os.environ.get('BYPSSD_QMP_SOCKET',str(project/'out/qemu-test/qmp.sock')))
     stream = sock.makefile('rwb')
     def receive():
         while True:

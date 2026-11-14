@@ -2,7 +2,7 @@
 import socket,sys,time
 from pathlib import Path
 s=socket.socket(socket.AF_UNIX);s.settimeout(1);s.connect(str(Path(__file__).resolve().parents[1]/'out/qemu-test/serial.sock'))
-s.sendall(('\n'+sys.argv[1]+"\nprintf '\\n__DONE__\\n'\n").encode());data=b'';end=time.time()+120
+s.sendall(('\n'+sys.argv[1]+"; printf '\\n__DONE__\\n'\n").encode());data=b'';end=time.time()+120
 while time.time()<end:
  try:p=s.recv(65536)
  except socket.timeout:continue
