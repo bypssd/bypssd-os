@@ -1,10 +1,10 @@
-# BYPSSD OS Renacer 1.0 · revisión 7
+# BYPSSD OS Renacer 1.0 · revisión 8
 
 Distribución para oficina y educación de BYPSSD Informática Retro (Valencia),
 con KDE Plasma 6.8.2 y base Fedora Linux 45. Identificador del sistema: `bypssd`.
 
 - **ARM64/aarch64:** ISO final publicada y checksum verificado.
-- **x64/x86_64:** compilación nativa en GitHub Actions en curso.
+- **x64/x86_64:** ISO publicada, compilada en runner nativo y arranque UEFI comprobado.
 - Español de España, teclado español, Europe/Madrid.
 - Amarillo #FFB800, negro #000000 y blanco #FFFFFF; escritorio oscuro inicial.
 - Sesión en vivo con instalación mediante Anaconda y cuenta definida por el usuario.
@@ -13,16 +13,21 @@ con KDE Plasma 6.8.2 y base Fedora Linux 45. Identificador del sistema: `bypssd`
 ## Descargas
 
 Las dos arquitecturas comparten esta release:
-https://github.com/bypssd/bypssd-os/releases/tag/renacer-1.0-r7
+https://github.com/bypssd/bypssd-os/releases/tag/renacer-1.0-r8
 
 Archivos locales de entrega:
 - `out/BYPSSD-OS-Renacer-1.0-aarch64.iso` y `.iso.sha256`.
-- `out/BYPSSD-OS-Renacer-1.0-x86_64.iso` y `.iso.sha256` (pendiente del runner).
+- `out/BYPSSD-OS-Renacer-1.0-x86_64.iso` y `.iso.sha256`.
 - `out/package-manifest-ARQUITECTURA.txt` y `out/branding-audit-ARQUITECTURA.json`.
 - `out/build-manifest-ARQUITECTURA.json`, procedencia y hashes locales.
 
 Verificar desde out/ con `shasum -a 256 -c NOMBRE.iso.sha256`.
 Las releases son candidatas de desarrollo; los RPM propios no tienen firma de producción.
+
+La revisión 8 conserva ARM64 sin cambios respecto a r7 y corrige el menú GRUB de x64.
+El kernel, initrd, ejecutables EFI y LiveOS de x64 conservan sus hashes originales.
+El paquete visual sigue en 1.0-7. Se ha comprobado el arranque en QEMU; no se ha
+validado todavía en todos los equipos físicos ni con Secure Boot.
 
 ## Qué incluye
 
@@ -99,6 +104,9 @@ El workflow `.github/workflows/build-iso.yml` usa runners nativos: Ubuntu x64
 o ARM64, y un contenedor Fedora 45 privilegiado aislado. No ejecuta código en el
 Mac ni toca Parallels. Necesita un repositorio público con Actions habilitado y
 permiso contents:write para publicar sus propias releases.
+
+Antes de publicar una nueva compilación, cambia las etiquetas de release del workflow
+para no colisionar con los artefactos ya publicados.
 
 ```sh
 gh workflow run build-iso.yml --repo bypssd/bypssd-os -f architecture=x86_64

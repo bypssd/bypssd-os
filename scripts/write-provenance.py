@@ -23,6 +23,8 @@ if not iso.is_file():
 data = {
     'product':'BYPSSD OS Renacer', 'version':'1.0', 'architecture':arch,
     'base':'Fedora 45', 'desktop':'Plasma 6.8.2', 'builder':'KIWI 11.1.1',
+    'image_revision':8, 'branding_rpm_version':'1.0-7',
+    'repack_run':os.environ.get('BYPSSD_REPACK_RUN_URL'),
     'recipe_commit':os.environ.get('BYPSSD_RECIPE_COMMIT'),
     'ci_run':os.environ.get('BYPSSD_CI_RUN_URL'),
     'recorded_at_utc':datetime.now(timezone.utc).isoformat(),
@@ -30,7 +32,7 @@ data = {
     'sources':{repo:commit('src/'+repo) for repo in ('breeze','plasma-workspace')},
     'fedora_kiwi_descriptions_commit':commit('kickstart/kiwi-upstream'),
     'files':{},
-    'publication_status':'development candidate; see README for remaining verification and branding review',
+    'publication_status':'published development candidate; current project file inventory, not a bit-for-bit rebuild claim',
 }
 for directory in ['assets','branding','scripts','docs']:
     for path in sorted((root/directory).rglob('*')):
