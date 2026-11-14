@@ -9,6 +9,6 @@ for arch in aarch64 x86_64; do
   mkdir -p "out/hosted-extras/$arch"
   dnf -y --setopt=install_weak_deps=False download --forcearch="$arch" \
     --destdir "out/hosted-extras/$arch" "${packages[@]}"
-  rpm --import "/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-45-$arch"
+  rpm --import /usr/share/pki/rpm-gpg/RPM-GPG-KEY-fedora-45-primary
   rpmkeys --checksig "out/hosted-extras/$arch/"*.rpm > "out/logs/hosted-signatures-$arch.txt"
 done
