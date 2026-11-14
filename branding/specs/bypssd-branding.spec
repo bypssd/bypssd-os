@@ -1,6 +1,6 @@
 Name:           bypssd-branding
 Version:        1.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Identidad visual de BYPSSD OS Renacer
 License:        GPL-2.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL:            https://bypssd.com
@@ -118,6 +118,8 @@ install -Dm644 branding/config/bypssd-repositories.repo %{buildroot}%{_datadir}/
 %{_unitdir}/bypssd-live.service
 
 %changelog
+* Sat Nov 14 2026 BYPSSD Informática Retro <info@bypssd.com> - 1.0-7
+- Corregir el enlace de LibreOffice de la página inicial.
 * Sat Nov 14 2026 BYPSSD Informática Retro <info@bypssd.com> - 1.0-6
 - Cerrar rutas secundarias de inicio y retirar restos huérfanos de temas sustituidos.
 * Sat Nov 14 2026 BYPSSD Informática Retro <info@bypssd.com> - 1.0-5
