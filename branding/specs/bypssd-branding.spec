@@ -1,6 +1,6 @@
 Name:           bypssd-branding
 Version:        1.0
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Identidad visual de BYPSSD OS Renacer
 License:        GPL-2.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL:            https://bypssd.com
@@ -30,6 +30,9 @@ La pantalla de bienvenida deriva de Plasma Workspace v6.8.2.
 mkdir -p %{buildroot}%{_datadir}/bypssd
 cp assets/*.png %{buildroot}%{_datadir}/bypssd/
 cp -a branding/start branding/browser %{buildroot}%{_datadir}/bypssd/
+install -Dm644 branding/browser/firefox-policies.json %{buildroot}/etc/firefox/policies/policies.json
+install -Dm644 branding/config/liveinst-hidden.desktop %{buildroot}/etc/skel/.local/share/applications/liveinst.desktop
+install -Dm644 branding/config/konquerorrc %{buildroot}/etc/skel/.config/konquerorrc
 install -Dm755 branding/config/bypssd-configure %{buildroot}%{_libexecdir}/bypssd-configure
 mkdir -p %{buildroot}/etc/skel/.kde/share/apps/konqueror
 cat > %{buildroot}/etc/skel/.kde/share/apps/konqueror/bookmarks.xml <<'BOOKMARKS'
@@ -104,6 +107,9 @@ install -Dm644 branding/config/bypssd-repositories.repo %{buildroot}%{_datadir}/
 %config(noreplace) /etc/anaconda/profile.d/bypssd.conf
 %config(noreplace) /etc/skel/.config/kdeglobals
 %config(noreplace) /etc/skel/.config/mimeapps.list
+%config(noreplace) /etc/firefox/policies/policies.json
+%config(noreplace) /etc/skel/.local/share/applications/liveinst.desktop
+%config(noreplace) /etc/skel/.config/konquerorrc
 %{_libexecdir}/bypssd-live
 %{_libexecdir}/bypssd-configure
 %config(noreplace) /etc/skel/.kde/share/apps/konqueror/bookmarks.xml
@@ -112,6 +118,8 @@ install -Dm644 branding/config/bypssd-repositories.repo %{buildroot}%{_datadir}/
 %{_unitdir}/bypssd-live.service
 
 %changelog
+* Sat Nov 14 2026 BYPSSD Informática Retro <info@bypssd.com> - 1.0-6
+- Cerrar rutas secundarias de inicio y retirar restos huérfanos de temas sustituidos.
 * Sat Nov 14 2026 BYPSSD Informática Retro <info@bypssd.com> - 1.0-5
 - Sustituir temas/fondos del proveedor; navegador BYPSSD y animaciones Renacer.
 * Sat Nov 14 2026 BYPSSD Informática Retro <info@bypssd.com> - 1.0-4

@@ -27,10 +27,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view renacer-1.0-r5 >/dev/null 2>&1 || gh release create renacer-1.0-r5 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 5' --notes-file docs/release-r5.md
-          gh release upload renacer-1.0-r5 out/*.iso out/*.iso.sha256 out/package-manifest-*.txt out/branding-audit-*.json
-          gh release view packages-1.0-5-${{ inputs.architecture }} >/dev/null 2>&1 || gh release create packages-1.0-5-${{ inputs.architecture }} --prerelease --title 'BYPSSD OS · Paquetes ${{ inputs.architecture }}' --notes-file docs/packages-r5.md
-          gh release upload packages-1.0-5-${{ inputs.architecture }} out/common-packages/${{ inputs.architecture }}/*.rpm out/srpms/*.src.rpm
+          gh release view renacer-1.0-r6 >/dev/null 2>&1 || gh release create renacer-1.0-r6 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 6' --notes-file docs/release-r5.md
+          gh release upload renacer-1.0-r6 out/*.iso out/*.iso.sha256 out/package-manifest-*.txt out/branding-audit-*.json
+          gh release view packages-1.0-6-${{ inputs.architecture }} >/dev/null 2>&1 || gh release create packages-1.0-6-${{ inputs.architecture }} --prerelease --title 'BYPSSD OS · Paquetes ${{ inputs.architecture }}' --notes-file docs/packages-r5.md
+          gh release upload packages-1.0-6-${{ inputs.architecture }} out/common-packages/${{ inputs.architecture }}/*.rpm out/srpms/*.src.rpm
       - name: Conservar registros
         if: always()
         uses: actions/upload-artifact@v4

@@ -12,3 +12,10 @@ if source.exists():
  text=target.read_text() if target.exists() else ''
  text='\n'.join(x for x in text.splitlines() if not x.startswith('export CHROME_VERSION_EXTRA='))
  target.write_text(text+'\nexport CHROME_VERSION_EXTRA="BYPSSD OS Renacer"\n')
+
+# Remove only abandoned generated scripts after the provider's theme package was
+# replaced. An installed theme with metadata is never removed by this cleanup.
+import shutil
+for name in ('org.fedoraproject.fedora.desktop','org.fedoraproject.fedoradark.desktop','org.fedoraproject.fedoralight.desktop'):
+ path=Path('/usr/share/plasma/look-and-feel')/name
+ if path.is_dir() and not (path/'metadata.json').exists():shutil.rmtree(path)
