@@ -1,0 +1,12 @@
+chromium
+firefox
+libreoffice-writer
+libreoffice-calc
+libreoffice-impress
+libreoffice-draw
+okular
+dolphin
+konsole
+ark
+gwenview
+spectacle

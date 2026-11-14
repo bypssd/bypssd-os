@@ -1,0 +1,33 @@
+name: Publicar aplicaciones habituales
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descargar RPM oficiales de las dos arquitecturas
+        run: docker run --rm -v "$PWD:/workspace" -w /workspace registry.fedoraproject.org/fedora:45 bash scripts/download-hosted-packages.sh
+      - name: Subir sin reemplazar archivos ya publicados
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for arch in aarch64 x86_64; do
+            tag="packages-1.0-7-$arch"
+            names=$(gh release view "$tag" --json assets --jq '.assets[].name')
+            for file in out/hosted-extras/$arch/*.rpm; do
+              if ! grep -Fxq "$(basename "$file")" <<< "$names"; then
+                gh release upload "$tag" "$file"
+              fi
+            done
+          done
+      - name: Conservar la verificación de firmas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosted-package-signatures
+          path: out/logs/hosted-signatures-*.txt
+          retention-days: 14
