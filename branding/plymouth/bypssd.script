@@ -1,0 +1,42 @@
+Window.SetBackgroundTopColor(0.035, 0.039, 0.047);
+Window.SetBackgroundBottomColor(0.035, 0.039, 0.047);
+center.x = Window.GetWidth() / 2;
+center.y = Window.GetHeight() / 2 - 70;
+logo.image = Image("logo.png").Scale(108, 108);
+logo.sprite = Sprite(logo.image);
+logo.sprite.SetX(center.x - 54); logo.sprite.SetY(center.y - 54);
+ring.image = Image("spinner.png"); ring.sprite = Sprite(ring.image);
+ring.sprite.SetX(center.x - 80); ring.sprite.SetY(center.y - 80);
+title.image = Image.Text("BYPSSD OS", 1, 1, 1, 1, "Sans 23");
+title.sprite = Sprite(title.image); title.sprite.SetX(center.x - title.image.GetWidth()/2); title.sprite.SetY(center.y + 106);
+subtitle.image = Image.Text("R E N A C E R", 1, 0.72, 0, 1, "Sans 11");
+subtitle.sprite = Sprite(subtitle.image); subtitle.sprite.SetX(center.x - subtitle.image.GetWidth()/2); subtitle.sprite.SetY(center.y + 152);
+track.sprite = Sprite(Image("track.png")); track.sprite.SetX(center.x - 90); track.sprite.SetY(center.y + 210);
+fill.image = Image("fill.png"); fill.sprite = Sprite(fill.image); fill.sprite.SetX(center.x - 90); fill.sprite.SetY(center.y + 210);
+progress = 0.02; angle = 0; frames = 0;
+fun refresh_callback() {
+    global.angle += 0.058;
+    global.frames++;
+    ring.sprite.SetImage(ring.image.Rotate(global.angle));
+    opacity = Math.Min(1, global.frames / 30);
+    logo.sprite.SetOpacity(opacity); title.sprite.SetOpacity(opacity); subtitle.sprite.SetOpacity(opacity); ring.sprite.SetOpacity(opacity);
+    fill.sprite.SetImage(fill.image.Scale(Math.Max(1, 180 * global.progress), 2));
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+fun progress_callback(duration, value) { global.progress = Math.Max(global.progress, value); }
+Plymouth.SetBootProgressFunction(progress_callback);
+message.sprite = Sprite();
+fun display_message(text) {
+    message.sprite.SetOpacity(1);
+    message.image = Image.Text(text, 0.88, 0.88, 0.88, 1, "Sans 12");
+    message.sprite.SetImage(message.image);
+    message.sprite.SetX(Window.GetWidth()/2 - message.image.GetWidth()/2);
+    message.sprite.SetY(Window.GetHeight() - 70);
+}
+Plymouth.SetDisplayMessageFunction(display_message);
+fun display_password(prompt, bullets) { text = prompt + " "; for (i=0; i<bullets; i++) text += "•"; display_message(text); }
+fun display_question(prompt, entry) { display_message(prompt + " " + entry); }
+fun display_normal() { message.sprite.SetOpacity(0); }
+Plymouth.SetDisplayPasswordFunction(display_password);
+Plymouth.SetDisplayQuestionFunction(display_question);
+Plymouth.SetDisplayNormalFunction(display_normal);

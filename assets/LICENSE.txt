@@ -1,0 +1,7 @@
+Los logos logo.png, logo_header.png y mascota.png han sido facilitados por Andy,
+responsable de BYPSSD Informática Retro, para su inclusión en BYPSSD OS.
+Las marcas y el arte de BYPSSD no se relicencian bajo la GPL del software.
+Las versiones de 48 y 256 píxeles son redimensionados del logo original.
+El fondo provisional se generó con image_gen; el prompt está en wallpaper-prompt.txt.
+Antes de publicar se debe confirmar la titularidad y licencia de distribución
+de todos los elementos del kit de marca. Esta nota no concede derechos de terceros.

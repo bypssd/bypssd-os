@@ -1,0 +1,14 @@
+kate
+kcalc
+kde-connect
+elisa-player
+haruna
+filelight
+skanpage
+kde-partitionmanager
+kfind
+krdc
+gimp
+inkscape
+libreoffice-math
+hunspell-es

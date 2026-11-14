@@ -1,0 +1,9 @@
+out/
+src/
+kickstart/kiwi-upstream/
+kickstart/upstream/
+kickstart/kiwi/
+*.qcow2
+*.fd
+__pycache__/
+*.pyc

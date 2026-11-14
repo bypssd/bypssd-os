@@ -1,0 +1,10 @@
+[KDE]
+LookAndFeelPackage=com.bypssd.desktop
+widgetStyle=BYPSSD
+
+[General]
+ColorScheme=BYPSSDRenacer
+AccentColor=255,184,0
+
+[Icons]
+Theme=breeze-dark

@@ -1,0 +1,7 @@
+[General]
+Name=BYPSSD OS
+Version=Renacer 1.0
+LogoPath=/usr/share/bypssd/logo-256.png
+Website=https://bypssd.com
+Variant=Oficina y educación
+UseOSReleaseVersion=false

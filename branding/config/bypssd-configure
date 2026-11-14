@@ -1,0 +1,14 @@
+#!/usr/bin/python3
+"""Apply supported browser defaults; preserve users' chosen profiles and data."""
+from pathlib import Path
+import json
+source=Path('/usr/share/bypssd/browser/master_preferences')
+if source.exists():
+ target=Path('/etc/chromium/master_preferences');target.parent.mkdir(parents=True,exist_ok=True)
+ target.write_text(source.read_text())
+ # Chromium's official wrapper sources this administrator configuration after
+ # assigning its distribution label. No binary or launcher is patched.
+ target=Path('/etc/chromium/chromium.conf')
+ text=target.read_text() if target.exists() else ''
+ text='\n'.join(x for x in text.splitlines() if not x.startswith('export CHROME_VERSION_EXTRA='))
+ target.write_text(text+'\nexport CHROME_VERSION_EXTRA="BYPSSD OS Renacer"\n')

@@ -1,0 +1,16 @@
+{
+  "KPlugin": {
+    "Id": "com.bypssd.desktop",
+    "Name": "BYPSSD OS Renacer",
+    "Description": "Escritorio BYPSSD para oficina y educación",
+    "Version": "1.0",
+    "License": "GPL-2.0-or-later",
+    "Authors": [
+      {
+        "Name": "BYPSSD Informática Retro"
+      }
+    ]
+  },
+  "KPackageStructure": "Plasma/LookAndFeel",
+  "X-Plasma-APIVersion": "2"
+}

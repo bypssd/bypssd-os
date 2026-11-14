@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+export LIVECMD=/usr/libexec/bypssd-anaconda
+if [ "$(id -u)" -eq 0 ]; then
+  exec /usr/bin/liveinst "$@"
+fi
+# liveinst obtains the user's session environment after pkexec. Set only the
+# supported LIVECMD hook for this invocation, then restore its previous value.
+old_value=$(systemctl --user show-environment | sed -n 's/^LIVECMD=//p')
+restore_environment() {
+  if [ -n "$old_value" ]; then
+    systemctl --user set-environment "LIVECMD=$old_value"
+  else
+    systemctl --user unset-environment LIVECMD
+  fi
+}
+trap restore_environment EXIT
+systemctl --user set-environment LIVECMD=/usr/libexec/bypssd-anaconda
+/usr/bin/liveinst "$@"

@@ -1,0 +1,8 @@
+{
+  "homepage": "file:///usr/share/bypssd/start/index.html",
+  "homepage_is_newtabpage": false,
+  "browser": {"show_home_button": true},
+  "session": {"restore_on_startup": 4,"startup_urls": ["file:///usr/share/bypssd/start/index.html"]},
+  "distribution": {"show_welcome_page": false,"skip_first_run_ui": true,"import_bookmarks": false,"import_history": false,"import_search_engine": false,"suppress_first_run_default_browser_prompt": true},
+  "first_run_tabs": ["file:///usr/share/bypssd/start/index.html"]
+}

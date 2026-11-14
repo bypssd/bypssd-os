@@ -1,0 +1,14 @@
+[Unit]
+Description=Configuración de la sesión en vivo de BYPSSD OS
+ConditionKernelCommandLine=rd.live.image
+Requires=livesys.service
+After=livesys.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bypssd-live
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

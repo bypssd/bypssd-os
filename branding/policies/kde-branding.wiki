@@ -1,0 +1,25 @@
+This page contains links to advice, how-tos, and plans for developing branding strategies and establishing best practices.
+If you need something else, don't hesitate to ask [https://matrix.to/#/#kde-promo:kde.org Promo]. 
+Some of the pages contain outdated content, so if you can update them, feel free to do so!
+
+== KDE's brand resources ==
+* [https://kde.org/stuff/clipart/ Download KDE's logo]
+* [[Promo/Material/Mascots|Download KDE's mascots: Konqi and Katie]]
+* [https://kde.org/contact/ KDE Press Kit (from 2019)]
+* 
+* [https://develop.kde.org/hig/style/color/default/ Breeze color palette - used for interfaces but can be applicable to promo material too].
+* Breeze icons might be used in material by or about KDE as well. Get them from Cuttlefish, or [https://develop.kde.org/frameworks/breeze-icons/ learn more about Breeze Icons].
+
+== Branding guidelines for projects ==
+
+* [[Promo/Branding/Made_by_KDE|'''"Made by KDE"''' Branding for Projects (promoting KDE and KDE software via its applications)]]
+* [[Promo/Branding/Software Label|Choosing a KDE Software Label]]
+
+== Outdated and/or obsolete branding content ==
+
+* [[Promo/Old/OriginalProposal|Rebranding KDE original proposal from 2009/2010]]
+**[https://community.kde.org/Promo/Guidance/Branding/Rebranding_KDE_v1.1.0 Brand Repositioning from 2009/2010]
+* [[Promo/Branding/Map|Brand Map]]
+* [[Promo/Distribution_Communication|Distribution Communication (includes branding)]]
+* [[Promo/Branding/Quick_Guide|Quick guide (beginnings of a branding cheat sheet)]]
+* [https://techbase.kde.org/Development/Guidelines/CIG Community Identity Guidelines on Techbase]

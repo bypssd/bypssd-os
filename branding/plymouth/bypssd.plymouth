@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=BYPSSD OS Renacer
+Description=Arranque de BYPSSD OS
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/bypssd
+ScriptFile=/usr/share/plymouth/themes/bypssd/bypssd.script

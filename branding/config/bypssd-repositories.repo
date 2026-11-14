@@ -1,0 +1,7 @@
+# User-facing labels only. Original signatures, URLs and repository IDs remain.
+[fedora*]
+name=BYPSSD OS - Base del sistema $releasever - $basearch
+[updates*]
+name=BYPSSD OS - Actualizaciones $releasever - $basearch
+[updates-testing*]
+name=BYPSSD OS - Actualizaciones de prueba $releasever - $basearch

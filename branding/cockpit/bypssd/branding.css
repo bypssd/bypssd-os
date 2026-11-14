@@ -1,0 +1,20 @@
+/* SPDX-License-Identifier: MIT */
+#badge, .anaconda .logo, .anaconda .pf-v6-c-brand, .anaconda .pf-v5-c-brand {
+  background-image: url("logo.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-width: 160px;
+  min-height: 64px;
+}
+#brand::before { content: "BYPSSD OS Renacer"; }
+.anaconda {
+  --brand-default: #FFB800;
+  --brand-default-light: #FFD166;
+  --brand-default-dark: #996E00;
+  --pf-t--global--color--brand--default: #FFB800;
+  --pf-t--global--color--brand--hover: #996E00;
+  --pf-v5-global--primary-color--100: #FFB800;
+  --pf-v5-global--primary-color--200: #996E00;
+}
+.anaconda .pf-v6-c-masthead, .anaconda .pf-v5-c-masthead { background: #191919; }

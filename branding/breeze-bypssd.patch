@@ -1,0 +1,39 @@
+diff --git a/kstyle/CMakeLists.txt b/kstyle/CMakeLists.txt
+index 773ab80..ab800f3 100644
+--- a/kstyle/CMakeLists.txt
++++ b/kstyle/CMakeLists.txt
+@@ -129,3 +129,5 @@ install(FILES breeze.kcfg DESTINATION ${KDE_INSTALL_KCFGDIR})
+ if (QT_MAJOR_VERSION EQUAL "6" AND TARGET "KF6::KCMUtils")
+     add_subdirectory(config)
+ endif()
++
++set_target_properties(breeze${QT_MAJOR_VERSION} PROPERTIES OUTPUT_NAME bypssdstyle${QT_MAJOR_VERSION})
+diff --git a/kstyle/breeze.json b/kstyle/breeze.json
+index a3d2b19..140c825 100644
+--- a/kstyle/breeze.json
++++ b/kstyle/breeze.json
+@@ -1 +1 @@
+-{ "Keys": [ "Breeze" ] }
++{ "Keys": [ "BYPSSD" ] }
+diff --git a/kstyle/breezestyleplugin.cpp b/kstyle/breezestyleplugin.cpp
+index 0b9cd7d..2bf11df 100644
+--- a/kstyle/breezestyleplugin.cpp
++++ b/kstyle/breezestyleplugin.cpp
+@@ -14,7 +14,7 @@ namespace Breeze
+ //_________________________________________________
+ QStyle *StylePlugin::create(const QString &key)
+ {
+-    if (key.compare(QLatin1String("breeze"), Qt::CaseInsensitive) == 0) {
++    if (key.compare(QLatin1String("bypssd"), Qt::CaseInsensitive) == 0) {
+         return new Style;
+     }
+     return nullptr;
+@@ -23,7 +23,7 @@ QStyle *StylePlugin::create(const QString &key)
+ //_________________________________________________
+ QStringList StylePlugin::keys() const
+ {
+-    return QStringList(QStringLiteral("Breeze"));
++    return QStringList(QStringLiteral("BYPSSD"));
+ }
+ 
+ }

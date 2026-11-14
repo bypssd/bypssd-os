@@ -1,0 +1,9 @@
+/* SPDX-License-Identifier: MIT */
+@define-color theme_selected_bg_color #FFB800;
+@define-color theme_selected_fg_color #000000;
+@define-color theme_bg_color #191919;
+@define-color theme_fg_color #FFFFFF;
+@define-color anaconda_bg_color #191919;
+.logo-sidebar { background-color: #191919; background-image: none; }
+.logo { background-image: url('/usr/share/bypssd/logo-256.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+.product-logo { background-image: url('/usr/share/bypssd/logo_header.png'); background-size: contain; background-repeat: no-repeat; }
