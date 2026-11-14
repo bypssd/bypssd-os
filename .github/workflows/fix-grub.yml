@@ -1,0 +1,32 @@
+name: Cerrar imágenes de arranque
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descargar las imágenes ya compiladas y sus comprobaciones
+        run: gh release download renacer-1.0-r7 --dir out/original-r7
+      - name: Reparar GRUB sin recompilar ni modificar el sistema Linux
+        run: |
+          docker run --rm -v "$PWD:/workspace" -w /workspace registry.fedoraproject.org/fedora:45 bash scripts/repack-grub-r8.sh 2>&1 | tee out/repack-r8.log
+      - name: Publicar las dos imágenes finales
+        run: |
+          gh release create renacer-1.0-r8 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 8' --notes-file docs/release-r8.md
+          gh release upload renacer-1.0-r8 out/publish-r8/*.iso out/publish-r8/*.sha256 out/publish-r8/*.json out/publish-r8/*.txt
+      - name: Guardar el registro de validación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grub-r8-validation
+          path: |
+            out/repack-r8.log
+            out/repack-tmp/*.cfg
+            out/publish-r8/grub-fix-report.json
+          retention-days: 14

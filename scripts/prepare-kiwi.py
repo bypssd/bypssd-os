@@ -2,6 +2,7 @@
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import os
+import runpy
 root = Path(__file__).resolve().parents[1]
 arch = os.environ.get('BYPSSD_ARCH','aarch64')
 if arch not in ('aarch64','x86_64'):raise SystemExit('Unsupported architecture: '+arch)
@@ -52,6 +53,8 @@ post=ks.split('%post --erroronfail --log=/root/bypssd-post.log\n',1)[1].rsplit('
 (out/'config.sh').write_text('#!/bin/bash\n# BYPSSD configuration, shared with the kickstart.\n'+post)
 (out/'config.sh').chmod(0o755)
 text=(root/'kickstart/kiwi-upstream'/template).read_text()
+if arch=='x86_64':
+    text=runpy.run_path(str(root/'scripts/fix-grub-video.py'))['repair'](text)
 text=text.replace('set default="1"','set default="0"').replace('--class fedora','--class bypssd').replace('Test this media & start ${title}','Comprobar el medio e iniciar ${title}').replace('Start ${title} in basic graphics mode','Iniciar ${title} con gráficos básicos').replace('Start ${title}','Iniciar ${title}').replace('Troubleshooting -->','Solución de problemas -->')
 (out/template).write_text(text)
 (out/'iso-esp-excludes.yaml').write_bytes((root/'kickstart/kiwi-upstream/iso-esp-excludes.yaml').read_bytes())
