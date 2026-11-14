@@ -40,6 +40,9 @@ for raw in ks.splitlines():
     else: ET.SubElement(packages,'package',name=line)
 for name in [f'grub2-efi-{efi}-modules','grubby','isomd5sum','btrfs-progs','udisks2-btrfs']:
     ET.SubElement(packages,'package',name=name)
+if arch == 'x86_64':
+    for name in ['grub2-pc','grub2-pc-modules']:
+        ET.SubElement(packages,'package',name=name)
 iso=ET.SubElement(image,'packages',type='iso')
 ET.SubElement(iso,'package',name=f'grub2-efi-{efi}-cdboot')
 ET.SubElement(iso,'file',name='iso-esp-excludes.yaml',target='image/exclude_files_efifatimage.yaml')

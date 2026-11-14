@@ -18,7 +18,7 @@ rpm --root "$root" -qa --qf '%{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\
 python3 scripts/audit-image.py "$root" > "out/branding-audit-$BYPSSD_ARCH.json"
 mkdir -p "out/common-packages/$BYPSSD_ARCH"
 mapfile -t packages < branding/common-packages.txt
-dnf -y download --destdir "out/common-packages/$BYPSSD_ARCH" "${packages[@]}"
+dnf -y --setopt=install_weak_deps=False download --destdir "out/common-packages/$BYPSSD_ARCH" "${packages[@]}"
 cp out/rpms/bypssd-branding-1.0-5*.rpm "out/common-packages/$BYPSSD_ARCH/"
 cp out/rpms/bypssd-release-identity-*.rpm "out/common-packages/$BYPSSD_ARCH/"
 cp out/rpms/bypssd-breeze-style-6.8.2-1.$BYPSSD_ARCH.rpm "out/common-packages/$BYPSSD_ARCH/"
