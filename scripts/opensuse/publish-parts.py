@@ -10,11 +10,11 @@ def sha(path):
  return h.hexdigest()
 if sha(iso)!=expected:raise SystemExit('ISO checksum mismatch')
 def gh(*x):return subprocess.check_output(['gh',*x,'--repo','bypssd/bypssd-os'],text=True)
-assets={x['name']:x for x in json.loads(gh('release','view',a.tag,'--json','assets'))['assets']}
+assets={x['name']:x for x in json.loads(subprocess.check_output(['gh','api','repos/bypssd/bypssd-os/releases/tags/'+a.tag],text=True))['assets']}
 def upload(path):
  old=assets.get(path.name)
  if old:
-  if old['size']!=path.stat().st_size:raise SystemExit('Published asset mismatch: '+path.name)
+  if old['size']!=path.stat().st_size or old.get('digest')!='sha256:'+sha(path):raise SystemExit('Published asset mismatch: '+path.name)
   return
  gh('release','upload',a.tag,str(path))
 parts=[]
