@@ -5,44 +5,121 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    color: "#000000"
+    color: "#101217"
     property bool authenticating: false
+    property bool wide: width >= 980
+    property bool compact: height < 740
+    property date now: new Date()
     function login() {
-        if (username.text.length && !authenticating) {
+        if (username.text.trim().length && !authenticating) {
             authenticating = true;
-            status.text = "Iniciando sesión…";
-            sddm.login(username.text, password.text, session.currentIndex);
+            status.text = "";
+            sddm.login(username.text.trim(), password.text, session.currentIndex);
         }
     }
-    Image { anchors.fill: parent; source: config.background; fillMode: Image.PreserveAspectCrop; opacity: 0.35 }
-    Rectangle {
+    Image { anchors.fill: parent; source: config.background; fillMode: Image.PreserveAspectCrop; opacity: 0.32 }
+    Rectangle { anchors.fill: parent; color: "#101217"; opacity: 0.36 }
+    Timer { interval: 30000; running: true; repeat: true; onTriggered: root.now = new Date() }
+    Text {
+        anchors.top: parent.top; anchors.right: parent.right; anchors.margins: 32
+        text: Qt.formatTime(root.now, "HH:mm"); color: "#C3C7D1"; font.pixelSize: 18
+    }
+    RowLayout {
         anchors.centerIn: parent
-        width: Math.min(440, parent.width - 40)
-        height: form.implicitHeight + 64
-        color: "#191919"; radius: 20; border.color: "#FFB800"
+        width: Math.min(root.wide ? 1060 : 440, root.width - 48)
+        spacing: root.wide ? 100 : 0
         ColumnLayout {
-            id: form
-            anchors.centerIn: parent
-            width: parent.width - 64
-            spacing: 16
-            Image { source: "/usr/share/bypssd/logo-256.png"; Layout.preferredWidth: 96; Layout.preferredHeight: 96; Layout.alignment: Qt.AlignHCenter }
-            Label { text: "BYPSSD OS"; color: "white"; font.pixelSize: 30; Layout.alignment: Qt.AlignHCenter }
-            Label { text: "Renacer"; color: "#FFB800"; font.pixelSize: 18; Layout.alignment: Qt.AlignHCenter }
-            TextField { palette.highlight: "#FFB800"; palette.base: "#24262B"; palette.text: "#FFFFFF"; palette.placeholderText: "#A2A5AF"; id: username; placeholderText: "Usuario"; text: userModel.lastUser; Layout.fillWidth: true; Accessible.name: "Usuario"; onAccepted: password.forceActiveFocus() }
-            TextField { palette.highlight: "#FFB800"; palette.base: "#24262B"; palette.text: "#FFFFFF"; palette.placeholderText: "#A2A5AF"; id: password; placeholderText: "Contraseña"; echoMode: TextInput.Password; Layout.fillWidth: true; Accessible.name: "Contraseña"; onAccepted: root.login() }
-            ComboBox { id: session; model: sessionModel; textRole: "name"; currentIndex: sessionModel.lastIndex; Layout.fillWidth: true; Accessible.name: "Sesión" }
-            Button { palette.button: "#FFB800"; palette.buttonText: "#111111"; text: "Entrar"; enabled: !root.authenticating; Layout.fillWidth: true; onClicked: root.login() }
-            Label { id: status; text: ""; color: "#FFB800"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.role: Accessible.AlertMessage }
-            RowLayout {
-                Button { text: "Reiniciar"; visible: sddm.canReboot; onClicked: sddm.reboot() }
-                Item { Layout.fillWidth: true }
-                Button { text: "Apagar"; visible: sddm.canPowerOff; onClicked: sddm.powerOff() }
+            visible: root.wide; Layout.fillWidth: true; spacing: 22
+            Image { source: "/usr/share/bypssd/logo-256.png"; Layout.preferredWidth: 82; Layout.preferredHeight: 82; fillMode: Image.PreserveAspectFit }
+            Text { text: "BYPSSD OS  /  RENACER"; color: "#FFB800"; font.pixelSize: 13; font.bold: true; font.letterSpacing: 2 }
+            Text { text: "Tu espacio.\nTu próxima idea."; color: "#FFFFFF"; font.pixelSize: 50; font.weight: Font.DemiBold; lineHeight: 1.12 }
+            Rectangle { width: 52; height: 3; radius: 1; color: "#FFB800" }
+            Text { text: "Todo empieza con una nueva sesión."; color: "#A4AAB7"; font.pixelSize: 15 }
+        }
+        Rectangle {
+            Layout.preferredWidth: root.wide ? 418 : Math.min(440, root.width - 48)
+            implicitHeight: form.implicitHeight + (root.compact ? 48 : 64)
+            radius: 24; color: "#191D25"; border.color: "#353B47"; border.width: 1
+            ColumnLayout {
+                id: form
+                anchors.centerIn: parent; width: parent.width - 64; spacing: root.compact ? 10 : 14
+                Text { text: "BIENVENIDO A CASA"; color: "#FFB800"; font.pixelSize: 10; font.bold: true; font.letterSpacing: 2; Layout.topMargin: 2 }
+                Text { text: "Inicia tu sesión"; color: "#F8F9FC"; font.pixelSize: 30; font.weight: Font.DemiBold }
+                Text { text: "BYPSSD OS Renacer"; color: "#9EA6B5"; font.pixelSize: 13; Layout.bottomMargin: 12 }
+                Text { text: "USUARIO"; color: "#AEB5C2"; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1 }
+                TextField {
+                    id: username
+                    Layout.fillWidth: true; Layout.preferredHeight: root.compact ? 44 : 50
+                    text: userModel.lastUser || ""; placeholderText: "Tu nombre de usuario"
+                    enabled: !root.authenticating; color: "#FFFFFF"; placeholderTextColor: "#747E90"
+                    leftPadding: 15; rightPadding: 15; font.pixelSize: 14
+                    selectionColor: "#FFB800"; selectedTextColor: "#101217"
+                    background: Rectangle { radius: 11; color: "#11151C"; border.color: username.activeFocus ? "#FFB800" : "#343C49"; border.width: username.activeFocus ? 2 : 1 }
+                    Accessible.name: "Usuario"
+                    onAccepted: password.forceActiveFocus()
+                }
+                Text { text: "CONTRASEÑA"; color: "#AEB5C2"; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1; Layout.topMargin: 5 }
+                TextField {
+                    id: password
+                    Layout.fillWidth: true; Layout.preferredHeight: root.compact ? 44 : 50
+                    enabled: !root.authenticating; placeholderText: "Introduce tu contraseña"
+                    echoMode: reveal.checked ? TextInput.Normal : TextInput.Password
+                    color: "#FFFFFF"; placeholderTextColor: "#747E90"; leftPadding: 15; rightPadding: 75; font.pixelSize: 14
+                    selectionColor: "#FFB800"; selectedTextColor: "#101217"
+                    background: Rectangle { radius: 11; color: "#11151C"; border.color: password.activeFocus ? "#FFB800" : "#343C49"; border.width: password.activeFocus ? 2 : 1 }
+                    ToolButton {
+                        id: reveal; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.rightMargin: 5
+                        checkable: true; text: checked ? "Ocultar" : "Mostrar"; enabled: !root.authenticating
+                        contentItem: Text { text: reveal.text; color: "#B1BACB"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        background: Rectangle { radius: 7; color: reveal.hovered ? "#29313F" : "transparent" }
+                        Accessible.name: checked ? "Ocultar contraseña" : "Mostrar contraseña"
+                    }
+                    Accessible.name: "Contraseña"; onAccepted: root.login()
+                }
+                ComboBox {
+                    id: session; Layout.fillWidth: true; Layout.preferredHeight: root.compact ? 34 : 38; Layout.topMargin: 3
+                    model: sessionModel; textRole: "name"; currentIndex: Math.max(0, sessionModel.lastIndex)
+                    enabled: !root.authenticating
+                    palette.text: "#C2CAD8"; palette.buttonText: "#C2CAD8"; palette.base: "#1B222D"; palette.window: "#1B222D"; palette.highlight: "#FFB800"; palette.highlightedText: "#11151C"
+                    background: Rectangle { radius: 9; color: "#1B222D"; border.color: "#343C49" }
+                    Accessible.name: "Tipo de sesión"
+                }
+                Button {
+                    id: enter; Layout.fillWidth: true; Layout.preferredHeight: root.compact ? 44 : 50; Layout.topMargin: 7
+                    enabled: !root.authenticating; text: root.authenticating ? "Entrando…" : "Entrar"
+                    contentItem: Text { text: enter.text; color: "#16130B"; font.pixelSize: 14; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    background: Rectangle { radius: 11; color: enter.down ? "#D99D00" : enter.hovered ? "#FFD166" : "#FFB800"; opacity: enter.enabled ? 1 : 0.65 }
+                    onClicked: root.login()
+                }
+                Text {
+                    id: status; text: ""; visible: text.length > 0
+                    color: "#FFB4AB"; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                    Accessible.role: Accessible.AlertMessage
+                }
+                Rectangle { Layout.fillWidth: true; height: 1; color: "#303744"; Layout.topMargin: 8; Layout.bottomMargin: 1 }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Button {
+                        id: reboot; text: "Reiniciar"; visible: sddm.canReboot; flat: true
+                        contentItem: Text { text: reboot.text; color: reboot.hovered ? "#FFFFFF" : "#A6AFBF"; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        background: Rectangle { radius: 8; color: reboot.hovered ? "#2B3340" : "transparent" }
+                        onClicked: sddm.reboot()
+                    }
+                    Item { Layout.fillWidth: true }
+                    Button {
+                        id: shutdown; text: "Apagar"; visible: sddm.canPowerOff; flat: true
+                        contentItem: Text { text: shutdown.text; color: shutdown.hovered ? "#FFFFFF" : "#A6AFBF"; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        background: Rectangle { radius: 8; color: shutdown.hovered ? "#2B3340" : "transparent" }
+                        onClicked: sddm.powerOff()
+                    }
+                }
             }
         }
     }
+    Text { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.margins: 28; text: "BYPSSD INFORMÁTICA RETRO  ·  VALENCIA"; color: "#9098A8"; font.pixelSize: 10; font.letterSpacing: 1; visible: root.height > 680 }
     Connections {
         target: sddm
-        function onLoginFailed() { root.authenticating = false; status.text = "No se ha podido iniciar sesión. Comprueba tus credenciales."; password.clear(); password.forceActiveFocus(); }
+        function onLoginFailed() { root.authenticating = false; status.text = "No se ha podido entrar. Comprueba el usuario y la contraseña."; password.clear(); password.forceActiveFocus(); }
     }
     Component.onCompleted: { if (username.text.length) password.forceActiveFocus(); else username.forceActiveFocus(); }
 }

@@ -1,10 +1,23 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Keep the native GRUB companion config beside the UEFI fallback binary.
+# Preserve vendor EFI config; generate a portable config when GRUB embeds it instead.
 set -eu
-[ -d /sys/firmware/efi ] || exit 0
+[ "${BYPSSD_EFI_TEST:-0}" = 1 ] || [ -d /sys/firmware/efi ] || exit 0
 source=/boot/efi/EFI/BYPSSD/grub.cfg
-[ -s "$source" ] || { echo "Falta la configuración EFI de BYPSSD: $source" >&2; exit 1; }
+if [ ! -s "$source" ]; then
+ [ -f /boot/grub2/grub.cfg ] || { echo 'Falta /boot/grub2/grub.cfg' >&2; exit 1; }
+ uuid=$(grub2-probe --target=fs_uuid /boot/grub2)
+ relative=$(grub2-mkrelpath /boot/grub2/grub.cfg)
+ [ -n "$uuid" ] && [ -n "$relative" ]
+ mkdir -p /boot/efi/EFI/BYPSSD
+ {
+  printf '# BYPSSD: configuración EFI portable\n'
+  case "$(grub2-probe --target=abstraction /boot/grub2)" in *cryptodisk*) printf 'cryptomount -a\n';; esac
+  printf 'search --no-floppy --fs-uuid --set=root %s\n' "$uuid"
+  printf 'set prefix=($root)%s\n' "${relative%/grub.cfg}"
+  printf 'configfile ($root)%s\n' "$relative"
+ } > "$source"
+fi
 mkdir -p /boot/efi/EFI/BOOT
 cp "$source" /boot/efi/EFI/BOOT/grub.cfg
 sync

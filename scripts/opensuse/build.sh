@@ -6,6 +6,8 @@ export BYPSSD_ARCH=$(uname -m)
 mkdir -p out/logs out/opensuse/rpms out/opensuse/srpms
 zypper --non-interactive refresh
 zypper --non-interactive install --no-recommends python3-kiwi kiwi-systemdeps-iso-media kiwi-systemdeps-bootloaders kiwi-systemdeps-filesystems rpm-build createrepo_c rsvg-convert curl python3-lxml
+for n in $(seq 0 31); do [ -b "/dev/loop$n" ] || mknod "/dev/loop$n" b 7 "$n"; done
+bash scripts/opensuse/check-install-and-login.sh 2>&1 | tee out/logs/install-login-check.log
 python3 scripts/opensuse/prepare.py
 for n in spinner track fill; do rsvg-convert "branding/plymouth/$n.svg" -o "out/opensuse/payload/usr/share/plymouth/themes/bypssd/$n.png"; done
 top=/var/tmp/bypssd-opensuse-rpmbuild
