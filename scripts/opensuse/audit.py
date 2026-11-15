@@ -20,5 +20,7 @@ for rel in ['usr/libexec/bypssd-calamares','usr/share/polkit-1/actions/com.bypss
  if not (root/rel).is_file():errors.append('Missing installer branding '+rel)
 if 'Defaults:%wheel !targetpw' not in (root/'etc/sudoers.d/91-bypssd-admin').read_text():errors.append('Administrator sudo would request root password')
 if '/home/*/Desktop/bypssd-install.desktop' not in (root/'etc/calamares/modules/shellprocess-bypssd-cleanup.conf').read_text():errors.append('Installed desktop keeps Live installer shortcut')
+if not (root/'usr/libexec/bypssd-efi-config').is_file():errors.append('Missing UEFI fallback config helper')
+if 'shellprocess@bypssd-efi' not in (root/'etc/calamares/settings.conf').read_text():errors.append('Missing UEFI fallback installer job')
 print(json.dumps({'repositories':repos,'required_packages':required,'errors':errors},indent=2))
 if errors:raise SystemExit(1)

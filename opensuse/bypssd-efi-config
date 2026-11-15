@@ -1,0 +1,10 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Keep the native GRUB companion config beside the UEFI fallback binary.
+set -eu
+[ -d /sys/firmware/efi ] || exit 0
+source=/boot/efi/EFI/BYPSSD/grub.cfg
+[ -s "$source" ] || { echo "Falta la configuración EFI de BYPSSD: $source" >&2; exit 1; }
+mkdir -p /boot/efi/EFI/BOOT
+cp "$source" /boot/efi/EFI/BOOT/grub.cfg
+sync

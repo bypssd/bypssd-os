@@ -16,7 +16,7 @@ en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instal
 
 - [Compilación openSUSE ARM64/x64](https://github.com/bypssd/bypssd-os/actions/workflows/build-opensuse.yml).
 - [Releases](https://github.com/bypssd/bypssd-os/releases). La nueva candidata se
-  llama `renacer-1.1-opensuse-r3` (ambas arquitecturas publicadas). La revisión r7
+  llama `renacer-1.1-opensuse-r3` (ambas arquitecturas publicadas). La revisión r8
   añade cinco diapositivas, barra con porcentaje real y correcciones del instalador; está en compilación.
 - Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente
   vacío, con índices RPM válidos para ambas arquitecturas.
@@ -48,7 +48,7 @@ para los RPM (`pkg_gpgcheck=1`); actualmente el índice vacío no lleva firma pr
 clave privada nueva. Antes de publicar RPM propios como actualizaciones se deberá
 configurar y distribuir una clave de firma adecuada.
 
-Discover incluye `discover7-backend-packagekit`, `PackageKit-backend-zypp`,
+Discover incluye `discover6-backend-packagekit`, `PackageKit-backend-zypp`,
 `PackageKit` y `AppStream`. Es una tienda de aplicaciones: no todos los RPM tienen
 metadatos para aparecer en ella. Las pruebas de búsqueda e instalación reales se
 documentan debajo. Se ha probado una instalación real desde la interfaz de Discover.
@@ -111,6 +111,7 @@ funcional y no bit a bit. Se publica el manifiesto de paquetes de cada composici
 - ARM64 r3: arranque UEFI, sesión automática y entrada de teclado comprobados en QEMU/HVF.
 - Discover: instalación gráfica de VLC tanto en Live como en el sistema ARM64 instalado. En el sistema instalado pide la contraseña del usuario administrador y completa la instalación. Los iconos aparecen correctamente al recargar Discover tras el primer refresco del catálogo.
 - Instalación completa ARM64 UEFI: finalizada sobre el disco virtual de 32 GiB usando r3 con la configuración GRUB y presentación corregidas. Arranque UEFI del disco instalado e inicio de sesión del usuario creado: correctos.
+- Imágenes para equipos UEFI de la arquitectura correspondiente. ARM64 no implica compatibilidad con todos los modelos de placas ni arranque nativo en un Mac Apple Silicon.
 - Secure Boot y equipos físicos requieren validación aparte.
 
 Los logs completos de compilación quedan en artefactos de Actions durante 30 días
@@ -126,7 +127,7 @@ trabajos de Calamares; debajo se indica la operación en curso. No usa una anima
 que simule avances. Fuentes en `opensuse/calamares/branding/`.
 
 La prueba completa detectó en r3 una configuración incompleta de GRUB
-(`KeyError: grubInstall`). r7 define las rutas nativas de grub2-install,
+(`KeyError: grubInstall`). r8 define las rutas nativas de grub2-install,
 grub2-mkconfig, grub2-probe y efibootmgr. r4/r5 se cancelaron para incorporar la solución.
 
 Se fuerza el renderizado Qt Quick por software solo en el instalador mediante
@@ -141,3 +142,13 @@ se retira también del escritorio del usuario creado durante la instalación.
 Prueba del administrador: contraseña propia aceptada por sudo y por la instalación
 gráfica de VLC. Se ha comprobado la ausencia de sudo, Polkit y autologin especiales
 de Live en el destino instalado, y el refresco correcto de ambos repositorios.
+
+La prueba de reinstalación encontró que GRUB necesitaba también su `grub.cfg`
+junto al cargador de reserva `EFI/BOOT`. Un trabajo posterior a `bootloader` copia
+la configuración EFI nativa a esa ruta, sin modificar los binarios del cargador.
+La corrección se ha probado arrancando el mismo disco por la ruta de reserva.
+
+La revisión r8 usa compresión Zstandard para el sistema Live: reduce el tiempo
+de generación frente a XZ, a cambio de una ISO algo mayor. Es una opción
+[compatible con KIWI](https://osinside.github.io/kiwi/image_description/elements.html).
+Las ISO completas y sus SHA256 sirven también para publicarlas en SourceForge.

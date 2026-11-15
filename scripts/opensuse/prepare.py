@@ -12,6 +12,7 @@ def write(dst,text):
  dst.parent.mkdir(parents=True,exist_ok=True)
  if dst.exists():dst.chmod(dst.stat().st_mode | 0o200)
  dst.write_text(text)
+copy(r/'opensuse/bypssd-efi-config',payload/'usr/libexec/bypssd-efi-config');(payload/'usr/libexec/bypssd-efi-config').chmod(0o755)
 copy(r/'assets',share/'bypssd');copy(r/'branding/start',share/'bypssd/start');copy(r/'branding/browser',share/'bypssd/browser')
 copy(r/'branding/look-and-feel',share/'plasma/look-and-feel/com.bypssd.desktop')
 p=share/'plasma/look-and-feel/com.bypssd.desktop/contents/defaults';p.write_text(p.read_text().replace('widgetStyle=BYPSSD','widgetStyle=Breeze'))
@@ -139,7 +140,7 @@ base='https://download.opensuse.org/'+('ports/aarch64/' if arch=='aarch64' else 
 image=E.Element('image',schemaversion='7.6',name='BYPSSD-OS-Renacer',displayname='BYPSSD OS Renacer')
 d=E.SubElement(image,'description',type='system')
 for k,v in [('author','BYPSSD Informática Retro'),('contact','https://bypssd.com'),('specification','BYPSSD OS Renacer 1.1 · KDE · base openSUSE Tumbleweed')]:E.SubElement(d,k).text=v
-prefs=E.SubElement(image,'preferences');t=E.SubElement(prefs,'type',image='iso',primary='true',flags='overlay',firmware='uefi',mediacheck='true',volid='BYPSSD',squashfscompression='xz',kernelcmdline='quiet splash=silent rd.live.image')
+prefs=E.SubElement(image,'preferences');t=E.SubElement(prefs,'type',image='iso',primary='true',flags='overlay',firmware='uefi',mediacheck='true',volid='BYPSSD',squashfscompression='zstd',kernelcmdline='quiet splash=silent rd.live.image')
 E.SubElement(t,'bootloader',name='grub2',timeout='5')
 for k,v in [('version','1.1.0'),('packagemanager','zypper'),('locale','es_ES'),('keytable','es'),('timezone','Europe/Madrid'),('rpm-excludedocs','true'),('bootsplash-theme','bypssd'),('bootloader-theme','bypssd')]:E.SubElement(prefs,k).text=v
 for alias,url,priority,check in [('bypssd-build','dir:///workspace/out/opensuse/rpms','1','false'),('opensuse-oss',base,'99','true')]:

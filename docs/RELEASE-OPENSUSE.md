@@ -18,6 +18,8 @@ Candidato: las pruebas reales de arranque, tienda e instalación deben constar e
 README antes de considerarlo listo para uso general. Secure Boot y hardware físico
 no se presuponen compatibles por el hecho de generar una ISO.
 
-Revisión r7: cinco diapositivas en español durante la instalación, barra amarilla
+Revisión r8: cinco diapositivas en español durante la instalación, barra amarilla
 con porcentaje real y operación en curso. Corrige las claves de comandos GRUB
 para la instalación UEFI y elimina la opción antigua de swap.
+
+Incluye la configuración de arranque de reserva UEFI y compresión Zstandard.

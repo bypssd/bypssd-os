@@ -1,6 +1,6 @@
 Name: bypssd-branding
 Version: 1.1
-Release: 7
+Release: 8
 Summary: Escritorio BYPSSD OS Renacer
 License: GPL-2.0-or-later AND GPL-3.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL: https://bypssd.com
@@ -41,3 +41,5 @@ cp -a usr %{buildroot}/
 /usr/share/polkit-1/actions/com.bypssd.install.policy
 
 /usr/libexec/bypssd-calamares
+
+/usr/libexec/bypssd-efi-config
