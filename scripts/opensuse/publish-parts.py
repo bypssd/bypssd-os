@@ -38,7 +38,7 @@ record={'architecture':a.arch,'iso':iso.name,'bytes':iso.stat().st_size,'sha256'
 record_path=iso.parent/f'iso-parts-{a.arch}.json';record_path.write_text(json.dumps(record,indent=2)+'\n');upload(record_path);upload(manifest)
 for pattern in (f'package-manifest-opensuse-{a.arch}.txt',f'audit-opensuse-{a.arch}.json'):
  for path in root.rglob(pattern):upload(path)
-pkg=f'bypssd-opensuse-1.1-{a.arch}'
+pkg=f'{a.tag}-branding-{a.arch}'
 try:gh('release','view',pkg)
 except subprocess.CalledProcessError:gh('release','create',pkg,'--prerelease','--title',f'BYPSSD branding y fuentes · openSUSE {a.arch}','--notes','Branding BYPSSD nativo de openSUSE; RPM propio y fuente, sin firma de producción.')
 old={x['name'] for x in json.loads(gh('release','view',pkg,'--json','assets'))['assets']}

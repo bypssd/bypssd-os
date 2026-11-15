@@ -15,12 +15,33 @@ def write(dst,text):
 copy(r/'assets',share/'bypssd');copy(r/'branding/start',share/'bypssd/start');copy(r/'branding/browser',share/'bypssd/browser')
 copy(r/'branding/look-and-feel',share/'plasma/look-and-feel/com.bypssd.desktop')
 p=share/'plasma/look-and-feel/com.bypssd.desktop/contents/defaults';p.write_text(p.read_text().replace('widgetStyle=BYPSSD','widgetStyle=Breeze'))
-p=share/'plasma/look-and-feel/com.bypssd.desktop/contents/layouts/org.kde.plasma.desktop-layout.js';p.write_text(p.read_text().replace('chromium-browser.desktop','chromium.desktop'))
+# The native openSUSE Chromium desktop ID is chromium-browser.desktop.
 copy(r/'branding/BYPSSDRenacer.colors',share/'color-schemes/BYPSSDRenacer.colors')
 copy(r/'branding/sddm',share/'sddm/themes/bypssd');copy(r/'branding/plymouth',share/'plymouth/themes/bypssd');copy(r/'assets/logo-256.png',share/'plymouth/themes/bypssd/logo.png')
 copy(r/'assets/wallpaper.png',share/'wallpapers/com.bypssd.wallpaper/contents/images/1920x1080.png');copy(r/'branding/wallpaper-metadata.json',share/'wallpapers/com.bypssd.wallpaper/metadata.json')
 copy(r/'assets/logo-48.png',share/'icons/hicolor/48x48/apps/bypssd-logo.png');copy(r/'assets/logo-256.png',share/'icons/hicolor/256x256/apps/bypssd-logo.png')
 copy(r/'opensuse/calamares/branding',share/'calamares/branding/bypssd');copy(r/'assets/logo-256.png',share/'calamares/branding/bypssd/logo.png');copy(r/'assets/wallpaper.png',share/'calamares/branding/bypssd/wallpaper.png')
+copy(r/'assets/wallpaper.png',share/'grub2/themes/bypssd/wallpaper.png')
+write(share/'grub2/themes/bypssd/theme.txt',"""desktop-image: "wallpaper.png"
+title-text: "BYPSSD OS Renacer"
+title-color: "#FFB800"
+title-font: "Unifont Regular 16"
+message-color: "#FFFFFF"
+terminal-font: "Unifont Regular 16"
++ boot_menu {
+ left = 10%
+ top = 35%
+ width = 80%
+ height = 40%
+ item_color = "#FFFFFF"
+ selected_item_color = "#FFB800"
+ item_font = "Unifont Regular 16"
+ selected_item_font = "Unifont Regular 16"
+ item_height = 36
+ item_padding = 12
+ item_spacing = 8
+}
+""")
 copy(r/'branding/licenses',share/'bypssd/licenses');copy(r/'assets/LICENSE.txt',share/'bypssd/licenses/ASSETS.txt')
 write(share/'bypssd/README.txt','BYPSSD OS Renacer 1.1\nDistribución independiente basada en openSUSE Tumbleweed.\nNo es un producto oficial de openSUSE ni de SUSE.\nSe conservan las licencias, firmas y atribuciones originales.\n')
 write(share/'metainfo/org.bypssd.bypssd.metainfo.xml','''<?xml version="1.0"?><component type="operating-system"><id>org.bypssd.bypssd</id><name>BYPSSD OS Renacer</name><summary>Sistema para oficina y educación</summary><metadata_license>CC0-1.0</metadata_license><project_license>LicenseRef-mixed</project_license><url type="homepage">https://bypssd.com</url><developer id="com.bypssd"><name>BYPSSD Informática Retro</name></developer></component>''')
@@ -30,6 +51,9 @@ for n in ('kdeglobals','ksplashrc','kscreenlockerrc'):
 copy(r/'branding/config/kcm-about-distrorc',root/'etc/skel/.config/kcm-about-distrorc')
 p=root/'etc/skel/.config/kcm-about-distrorc';p.write_text(p.read_text().replace('Renacer 1.0','Renacer 1.1').replace('/usr/share/bypssd/logo-256.png','/usr/share/bypssd/logo-256.png'))
 copy(r/'branding/config/sddm.conf',root/'etc/sddm.conf.d/90-bypssd.conf')
+p=root/'etc/sddm.conf.d/90-bypssd.conf';p.write_text(p.read_text().replace('[General]','[General]\nInputMethod='))
+copy(r/'branding/config/mimeapps.list',root/'etc/skel/.config/mimeapps.list')
+copy(r/'branding/config/mimeapps.list',root/'etc/xdg/mimeapps.list')
 write(root/'usr/share/bypssd/os-release','''NAME="BYPSSD OS"
 PRETTY_NAME="BYPSSD OS Renacer 1.1"
 ID=bypssd
@@ -79,11 +103,13 @@ id linux >/dev/null 2>&1 || useradd -m -c 'Sesión Live BYPSSD' -G users,video,a
 passwd -d linux
 session=$(basename "$(find /usr/share/wayland-sessions -name '*plasma*.desktop' | head -1)")
 mkdir -p /etc/sddm.conf.d
+printf '\\nDISPLAYMANAGER_AUTOLOGIN="linux"\\n' >> /etc/sysconfig/displaymanager
 printf '[Autologin]\\nUser=linux\\nSession=%s\\nRelogin=false\\n' "$session" > /etc/sddm.conf.d/10-bypssd-live.conf
 install -d -o linux -g users /home/linux/Desktop
 install -o linux -g users -m755 /usr/share/applications/bypssd-install.desktop /home/linux/Desktop/
 ''');(root/'usr/libexec/bypssd-live-setup').chmod(0o755)
 # Browser configuration is supported admin policy, not a patched browser binary.
+copy(r/'branding/browser/master_preferences',root/'etc/chromium/master_preferences')
 copy(r/'branding/browser/firefox-policies.json',root/'etc/firefox/policies/policies.json')
 write(root/'etc/chromium/policies/managed/bypssd.json',json.dumps({'HomepageLocation':'file:///usr/share/bypssd/start/index.html','HomepageIsNewTabPage':False,'RestoreOnStartup':4,'RestoreOnStartupURLs':['file:///usr/share/bypssd/start/index.html'],'ShowHomeButton':True,'BookmarkBarEnabled':False},indent=2))
 # native architecture repos and bootstrap (no Fedora RPM URLs or packages)
@@ -93,7 +119,7 @@ d=E.SubElement(image,'description',type='system')
 for k,v in [('author','BYPSSD Informática Retro'),('contact','https://bypssd.com'),('specification','BYPSSD OS Renacer 1.1 · KDE · base openSUSE Tumbleweed')]:E.SubElement(d,k).text=v
 prefs=E.SubElement(image,'preferences');t=E.SubElement(prefs,'type',image='iso',primary='true',flags='overlay',firmware='uefi',mediacheck='true',volid='BYPSSD',squashfscompression='xz',kernelcmdline='quiet splash=silent rd.live.image')
 E.SubElement(t,'bootloader',name='grub2',timeout='5')
-for k,v in [('version','1.1.0'),('packagemanager','zypper'),('locale','es_ES'),('keytable','es'),('timezone','Europe/Madrid'),('rpm-excludedocs','true'),('bootsplash-theme','bypssd'),('bootloader-theme','breeze')]:E.SubElement(prefs,k).text=v
+for k,v in [('version','1.1.0'),('packagemanager','zypper'),('locale','es_ES'),('keytable','es'),('timezone','Europe/Madrid'),('rpm-excludedocs','true'),('bootsplash-theme','bypssd'),('bootloader-theme','bypssd')]:E.SubElement(prefs,k).text=v
 for alias,url,priority,check in [('bypssd-build','dir:///workspace/out/opensuse/rpms','1','false'),('opensuse-oss',base,'99','true')]:
  repo=E.SubElement(image,'repository',type='rpm-md',alias=alias,priority=priority,package_gpgcheck=check);E.SubElement(repo,'source',path=url)
 pkgs=E.SubElement(image,'packages',type='bootstrap')

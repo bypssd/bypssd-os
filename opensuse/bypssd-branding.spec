@@ -1,9 +1,11 @@
 Name: bypssd-branding
 Version: 1.1
-Release: 1
+Release: 2
 Summary: Escritorio BYPSSD OS Renacer
 License: GPL-2.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL: https://bypssd.com
+Vendor: BYPSSD Informática Retro
+Distribution: BYPSSD OS Renacer
 Source0: bypssd-branding-1.1.tar.gz
 BuildArch: noarch
 Provides: plasma6-branding = 6.8.2
@@ -31,3 +33,5 @@ cp -a usr %{buildroot}/
 /usr/share/metainfo/org.bypssd.bypssd.metainfo.xml
 /usr/share/icons/hicolor/48x48/apps/bypssd-logo.png
 /usr/share/icons/hicolor/256x256/apps/bypssd-logo.png
+
+/usr/share/grub2/themes/bypssd
