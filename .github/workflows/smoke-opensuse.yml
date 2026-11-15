@@ -1,0 +1,51 @@
+name: Arrancar ISO openSUSE en QEMU
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  boot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: '43699024603'
+          name: opensuse-delivery-x86_64
+          path: incoming
+      - name: Arrancar la ISO exacta en un equipo virtual de prueba
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 ovmf python3-pil
+          mkdir -p out/cloud-qemu
+          iso=$(find incoming -name 'BYPSSD-OS-Renacer-1.1-x86_64.iso' -print -quit)
+          (cd "$(dirname "$iso")" && sha256sum -c "$(basename "$iso").sha256")
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd out/cloud-qemu/vars.fd
+          accel=(-accel tcg -cpu max)
+          if [ -c /dev/kvm ]; then sudo chmod 666 /dev/kvm; accel=(-accel kvm -cpu host); fi
+          qemu-img create -f qcow2 out/cloud-qemu/test.qcow2 32G
+          qemu-system-x86_64 -machine q35 "${accel[@]}" -smp 2 -m 4096 -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=out/cloud-qemu/vars.fd -drive "file=$iso,media=cdrom,readonly=on,format=raw" -drive file=out/cloud-qemu/test.qcow2,format=qcow2,if=virtio -device virtio-vga -device qemu-xhci -device usb-kbd -device usb-tablet -netdev user,id=n0 -device virtio-net-pci,netdev=n0 -display none -serial file:out/cloud-qemu/serial.log -qmp unix:out/cloud-qemu/qmp.sock,server=on,wait=off > out/cloud-qemu/qemu.log 2>&1 &
+          vm_pid=$!
+          trap 'kill "$vm_pid" 2>/dev/null || true' EXIT
+          export BYPSSD_QMP_SOCKET="$PWD/out/cloud-qemu/qmp.sock"
+          for n in 1 2 3 4; do
+            sleep 45
+            python3 scripts/qmp.py screendump "{\"filename\":\"$PWD/out/cloud-qemu/boot-$n.ppm\"}"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          for p in Path('out/cloud-qemu').glob('*.ppm'):Image.open(p).save(p.with_suffix('.png'))
+          PY
+          python3 scripts/qmp.py quit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opensuse-x64-boot
+          path: |
+            out/cloud-qemu/*.png
+            out/cloud-qemu/*.log
+          retention-days: 30
