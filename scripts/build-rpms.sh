@@ -13,7 +13,11 @@ else
 fi
 tar -czf "$top/SOURCES/bypssd-branding-1.0.tar.gz" --transform='s,^,bypssd-branding-1.0/,' branding assets
 rpmbuild -ba --define "_topdir $top" branding/specs/bypssd-branding.spec
-identity=$(dnf -q repoquery --latest-limit 1 --queryformat '%{version} %{release}' fedora-release-common)
+if [[ ${BYPSSD_CATALOG_BUILD:-0} == 1 ]]; then
+  identity=$(dnf -q --repo=bypssd-base --repo=bypssd-updates repoquery --latest-limit 1 --queryformat '%{version} %{release}' fedora-release-common)
+else
+  identity=$(dnf -q repoquery --latest-limit 1 --queryformat '%{version} %{release}' fedora-release-common)
+fi
 read -r identity_version identity_release <<< "$identity"
 rpmbuild -ba --define "_topdir $top" \
   --define "fedora_identity_version $identity_version" \

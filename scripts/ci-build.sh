@@ -8,6 +8,8 @@ mkdir -p src out/logs
 case "$phase" in
 rpms)
   bash scripts/container-setup.sh
+  install -Dm644 branding/config/bypssd-github.repo /etc/yum.repos.d/bypssd-github.repo
+  export BYPSSD_CATALOG_BUILD=1
   for repo in breeze plasma-workspace; do
     git clone --depth 1 --branch v6.8.2 "https://invent.kde.org/plasma/$repo.git" "src/$repo"
     test "$(git -C "src/$repo" rev-parse HEAD)" = "$(cat "branding/$repo-upstream.commit")"
