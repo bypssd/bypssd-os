@@ -1,7 +1,7 @@
 #!/bin/bash
 # Integration check in an isolated privileged CI container, never a user disk.
 set -euxo pipefail
-zypper -n install --no-recommends grub2 dosfstools e2fsprogs sddm-qt6 xorg-x11-server-Xvfb ImageMagick qt6-declarative-imports
+zypper -n install --no-recommends grub2 dosfstools e2fsprogs sddm-qt6 xorg-x11-server-Xvfb ImageMagick qt6-declarative-imports dejavu-fonts
 qa=$(mktemp -d /var/tmp/bypssd-check.XXXXXX)
 truncate -s 128M "$qa/boot.img"
 truncate -s 64M "$qa/efi.img"

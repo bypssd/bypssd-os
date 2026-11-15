@@ -1,0 +1,32 @@
+name: Vista previa del login BYPSSD
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Renderizar tema con las fuentes reales
+        run: |
+          mkdir -p out/logs
+          docker run --rm -v "$PWD:/workspace" -w /workspace opensuse/tumbleweed bash -euxc '
+            zypper -n install --no-recommends sddm-qt6 qt6-declarative-imports xorg-x11-server-Xvfb ImageMagick dejavu-fonts
+            mkdir -p /usr/share/bypssd /tmp/runtime
+            chmod 700 /tmp/runtime
+            cp assets/logo-256.png assets/wallpaper.png /usr/share/bypssd/
+            Xvfb :99 -screen 0 1280x800x24 -ac >/tmp/xvfb.log 2>&1 &
+            sleep 2
+            greeter=$(command -v sddm-greeter-qt6 || command -v sddm-greeter)
+            DISPLAY=:99 XDG_RUNTIME_DIR=/tmp/runtime QT_QUICK_BACKEND=software "$greeter" --test-mode --theme /workspace/branding/sddm >out/logs/login-preview.log 2>&1 &
+            sleep 6
+            DISPLAY=:99 import -window root out/logs/login-preview.png
+          '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: login-preview
+          path: out/logs/
+          retention-days: 7

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Resume temporary GitHub Actions artifacts with parallel HTTP ranges; verify ISO."""
 import argparse,concurrent.futures,hashlib,json,os,pathlib,subprocess,threading,time,urllib.request,urllib.error,zipfile,shutil
-p=argparse.ArgumentParser();p.add_argument('run',type=int);p.add_argument('arch',choices=['aarch64','x86_64']);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('run',type=int);p.add_argument('arch',choices=['aarch64','x86_64']);p.add_argument('--output-dir',default='out');p.add_argument('--output-name');a=p.parse_args()
 r=pathlib.Path(__file__).resolve().parents[1];directory=r/'out/actions-transfer'/str(a.run)/a.arch;directory.mkdir(parents=True,exist_ok=True)
-name=f'BYPSSD-OS-Renacer-1.1-{a.arch}.iso';target=r/'out'/name
+name=f'BYPSSD-OS-Renacer-1.1-{a.arch}.iso';target=(r/a.output_dir)/(a.output_name or name);target.parent.mkdir(parents=True,exist_ok=True)
 if target.exists():raise SystemExit('El destino ya existe: '+str(target))
 meta=json.loads(subprocess.check_output(['gh','api',f'repos/bypssd/bypssd-os/actions/runs/{a.run}/artifacts'],text=True))
 artifact=next(x for x in meta['artifacts'] if x['name']=='opensuse-delivery-'+a.arch)
@@ -89,7 +89,7 @@ with zipfile.ZipFile(archive) as package:
   for member in members:
    base=pathlib.PurePosixPath(member).name
    if base.startswith(prefix):
-    path=pathlib.Path(base);(r/'out'/(path.stem+'-r8'+path.suffix)).write_bytes(package.read(member))
-partial.replace(target);target.with_suffix('.iso.sha256').write_text(expected+'  '+name+'\n')
-(r/'out'/f'delivery-r8-{a.arch}.json').write_text(json.dumps({'run':a.run,'artifact':artifact['id'],'arch':a.arch,'iso':name,'bytes':target.stat().st_size,'sha256':expected},indent=2)+'\n')
+    path=pathlib.Path(base);(r/'out'/(path.stem+'-run-'+str(a.run)+path.suffix)).write_bytes(package.read(member))
+partial.replace(target);target.with_suffix('.iso.sha256').write_text(expected+'  '+target.name+'\n')
+(r/'out'/f'delivery-{a.run}-{a.arch}.json').write_text(json.dumps({'run':a.run,'artifact':artifact['id'],'arch':a.arch,'iso':str(target.relative_to(r)),'bytes':target.stat().st_size,'sha256':expected},indent=2)+'\n')
 archive.unlink();checkpoint.unlink();print('VERIFIED',a.arch,target,flush=True)
