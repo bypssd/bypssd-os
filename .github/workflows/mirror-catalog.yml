@@ -1,0 +1,84 @@
+name: Catálogo completo BYPSSD en GitHub
+on:
+  workflow_dispatch:
+    inputs:
+      snapshot:
+        description: Identificador inmutable del catálogo
+        default: '20261115'
+        required: true
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: mirror-catalog
+  cancel-in-progress: false
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      chunks: ${{ steps.plan.outputs.chunks }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y zstd
+      - id: plan
+        run: python3 scripts/mirror-catalog.py inventory --snapshot '${{ inputs.snapshot }}' > catalog-inventory.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: catalog-plan
+          path: |
+            out/catalog/plan.json
+            out/catalog/metadata/
+            catalog-inventory.json
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: catalog-chunks
+          path: out/catalog/chunk-*.json
+          retention-days: 30
+  packages:
+    needs: inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        chunk: ${{ fromJSON(needs.inventory.outputs.chunks) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: catalog-chunks
+          path: out/catalog
+      - name: Verificar y publicar lote de hasta 900 RPM
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/mirror-catalog.py upload --chunk '${{ matrix.chunk }}'
+  metadata:
+    needs: [inventory, packages]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: catalog-plan
+          path: plan-download
+      - run: |
+          mkdir -p out/catalog
+          cp -r plan-download/out/catalog/* out/catalog/
+      - uses: actions/download-artifact@v4
+        with:
+          name: catalog-chunks
+          path: out/catalog
+      - name: Comprobar cada asset y generar repositorios BYPSSD
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/mirror-catalog.py finalize
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4
