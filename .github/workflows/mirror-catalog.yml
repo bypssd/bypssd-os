@@ -6,6 +6,10 @@ on:
         description: Identificador inmutable del catálogo
         default: '20261115'
         required: true
+      resume_run:
+        description: Reanudar el inventario inmutable de un run anterior (opcional)
+        required: false
+        default: ''
 permissions:
   contents: write
   pages: write
@@ -22,8 +26,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Recuperar inventario inmutable si se reanuda
+        if: inputs.resume_run != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESUME_RUN: ${{ inputs.resume_run }}
+        run: |
+          gh run download "$RESUME_RUN" --name catalog-plan --dir imported-plan
+          mkdir -p out/catalog
+          cp -r imported-plan/out/catalog/* out/catalog/
+          cp imported-plan/catalog-inventory.json .
+          gh run download "$RESUME_RUN" --name catalog-chunks --dir out/catalog
       - id: plan
-        run: python3 scripts/mirror-catalog.py inventory --snapshot '${{ inputs.snapshot }}' > catalog-inventory.json
+        env:
+          SNAPSHOT: ${{ inputs.snapshot }}
+          RESUME_RUN: ${{ inputs.resume_run }}
+        run: |
+          if [ -z "$RESUME_RUN" ]; then
+            python3 scripts/mirror-catalog.py inventory --snapshot "$SNAPSHOT" > catalog-inventory.json
+          else
+            python3 -c 'import json,os; p=json.load(open("out/catalog/plan.json")); open(os.environ["GITHUB_OUTPUT"],"a").write("chunks="+json.dumps(p["chunks"])+"\n")'
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: catalog-plan

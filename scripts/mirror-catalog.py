@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Immutable full binary-catalog mirror; never changes RPM headers/signatures."""
+import sys
 import argparse, bz2, concurrent.futures, gzip, hashlib, json, lzma, os, pathlib, subprocess, time, urllib.request, urllib.parse, xml.etree.ElementTree as E
 P=pathlib.Path
 R='http://linux.duke.edu/metadata/repo'; C='http://linux.duke.edu/metadata/common'
@@ -10,7 +11,15 @@ def get(url):
         except Exception:
             if attempt==4:raise
             time.sleep(2**attempt)
-def gh(*args):return subprocess.check_output(['gh',*args],text=True).strip()
+def gh(*args):
+    for attempt in range(8):
+        result=subprocess.run(['gh',*args],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        if result.returncode==0:return result.stdout.strip()
+        message=result.stderr.lower()
+        if not any(x in message for x in ('rate limit','http 429','http 502','http 503','http 504','connection reset','timeout')):
+            raise RuntimeError(result.stderr)
+        if attempt==7:raise RuntimeError(result.stderr)
+        time.sleep(min(60*2**attempt,900))
 def unpack(data,name):
     if name.endswith('.gz'):return gzip.decompress(data)
     if name.endswith('.xz'):return lzma.decompress(data)
@@ -60,13 +69,16 @@ def inventory(a):
     for p in packages:p['tag']=mapping[p['name'],p['checksum']]
     plan={'snapshot':a.snapshot,'repository':a.repository,'repos':repos,'packages':packages,'chunks':chunks,'unique_packages':len(items),'bytes':sum(x['size'] for x in items)}
     (root/'plan.json').write_text(json.dumps(plan))
+    print(f"Inventory: {len(items)} unique RPMs; {plan['bytes']} bytes; {len(chunks)} release shards", file=sys.stderr,flush=True)
     print(json.dumps({k:plan[k] for k in ('snapshot','unique_packages','bytes','chunks')}))
     if os.getenv('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('chunks='+json.dumps(chunks)+'\n')
 def upload(a):
     entries=json.loads((P(a.directory)/f'chunk-{a.chunk}.json').read_text());tag=entries[0]['tag']
     try:gh('release','view',tag,'--repo',a.repository)
-    except subprocess.CalledProcessError:gh('release','create',tag,'--repo',a.repository,'--prerelease','--title',f'BYPSSD OS · catálogo {tag}','--notes','Repositorio BYPSSD. RPM redistribuidos sin alterar firmas, licencias ni atribuciones de origen.')
+    except RuntimeError as ex:
+        if not any(x in str(ex).lower() for x in ('not found','http 404')):raise
+        gh('release','create',tag,'--repo',a.repository,'--prerelease','--title',f'BYPSSD OS · catálogo {tag}','--notes','Repositorio BYPSSD. RPM redistribuidos sin alterar firmas, licencias ni atribuciones de origen.')
     rid=gh('api',f'repos/{a.repository}/releases/tags/{tag}','--jq','.id')
     pages=json.loads(gh('api',f'repos/{a.repository}/releases/{rid}/assets?per_page=100','--paginate','--slurp'))
     existing={x['name']:x for page in pages for x in page}
@@ -114,6 +126,9 @@ def finalize(a):
                     if el.tag in ('{'+R+'}header-checksum','{'+R+'}header-size'):entry.remove(el)
             entry.find('{'+R+'}location').set('href','repodata/'+name);(dest/name).write_bytes(data)
         (dest/'repomd.xml').write_bytes(E.tostring(repomd,encoding='utf-8',xml_declaration=True))
-    (out/'catalog-summary.json').write_text(json.dumps({k:plan[k] for k in ('snapshot','unique_packages','bytes','chunks')},indent=2))
+    (out/'catalog-summary.json').write_text(json.dumps(dict(status='complete', **{k:plan[k] for k in ('snapshot','unique_packages','bytes','chunks')}),indent=2))
+    (out/'bypssd.repo').write_bytes(P('branding/config/bypssd-github.repo').read_bytes())
+    (out/'index.html').write_text('<!doctype html><meta charset="utf-8"><title>BYPSSD OS · Repositorio</title><h1>BYPSSD OS</h1><p>Catálogo binario completo para ARM64 y x64, servido desde GitHub.</p><p><a href="bypssd.repo">Configuración DNF</a> · <a href="catalog-summary.json">Inventario verificado</a></p>')
     (out/'.nojekyll').touch();print('COMPLETE: all package assets verified; metadata ready')
-a=argparse.ArgumentParser();a.add_argument('mode',choices=['inventory','upload','finalize']);a.add_argument('--directory',default='out/catalog');a.add_argument('--repository',default='bypssd/bypssd-os');a.add_argument('--snapshot',default=time.strftime('%Y%m%d'));a.add_argument('--chunk');a.add_argument('--site',default='site');args=a.parse_args();globals()[args.mode](args)
+if __name__=='__main__':
+    a=argparse.ArgumentParser();a.add_argument('mode',choices=['inventory','upload','finalize']);a.add_argument('--directory',default='out/catalog');a.add_argument('--repository',default='bypssd/bypssd-os');a.add_argument('--snapshot',default=time.strftime('%Y%m%d'));a.add_argument('--chunk');a.add_argument('--site',default='site');args=a.parse_args();globals()[args.mode](args)

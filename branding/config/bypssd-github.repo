@@ -1,0 +1,20 @@
+# BYPSSD serves these packages. Original RPM signatures and attribution preserved.
+[bypssd-base]
+name=BYPSSD OS - Base $releasever - $basearch
+baseurl=https://bypssd.github.io/bypssd-os/45/$basearch/base/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=0
+gpgkey=file:///usr/share/pki/rpm-gpg/RPM-GPG-KEY-fedora-45-primary
+metadata_expire=6h
+skip_if_unavailable=0
+
+[bypssd-updates]
+name=BYPSSD OS - Actualizaciones $releasever - $basearch
+baseurl=https://bypssd.github.io/bypssd-os/45/$basearch/updates/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=0
+gpgkey=file:///usr/share/pki/rpm-gpg/RPM-GPG-KEY-fedora-45-primary
+metadata_expire=1h
+skip_if_unavailable=0
