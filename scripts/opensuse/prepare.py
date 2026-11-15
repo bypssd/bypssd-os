@@ -45,9 +45,14 @@ BUG_REPORT_URL="https://github.com/bypssd/bypssd-os/issues"
 write(root/'etc/sudoers.d/90-bypssd-live','linux ALL=(ALL) NOPASSWD: ALL\n');(root/'etc/sudoers.d/90-bypssd-live').chmod(0o440)
 write(root/'etc/sudoers.d/91-bypssd-admin','%wheel ALL=(ALL:ALL) ALL\n');(root/'etc/sudoers.d/91-bypssd-admin').chmod(0o440)
 write(root/'etc/polkit-1/rules.d/49-bypssd-live.rules','''polkit.addRule(function(action, subject) {
- if (subject.user === "linux" && subject.local && subject.active && action.id === "org.freedesktop.policykit.exec" && action.lookup("program") === "/usr/bin/calamares") return polkit.Result.YES;
+ if (subject.user !== "linux" || !subject.local || !subject.active) return;
+ if (action.id === "io.calamares.calamares.pkexec.run") return polkit.Result.YES;
+ if (action.id === "org.freedesktop.policykit.exec" && action.lookup("program") === "/usr/bin/calamares") return polkit.Result.YES;
+ var allowed = ["package-install", "package-reinstall", "package-remove", "system-sources-refresh", "system-update"];
+ for (var i=0; i<allowed.length; i++) if (action.id === "org.freedesktop.packagekit." + allowed[i]) return polkit.Result.YES;
 });
 ''')
+write(root/'etc/polkit-1/rules.d/50-bypssd-admin.rules','polkit.addAdminRule(function(action, subject) { return ["unix-group:wheel"]; });\n')
 write(root/'usr/share/applications/bypssd-install.desktop','''[Desktop Entry]
 Type=Application
 Name=Instalar BYPSSD OS

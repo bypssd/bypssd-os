@@ -40,6 +40,12 @@ jobs:
             out/audit-opensuse-*.json
       - name: Publicar candidato y fuentes propias
         run: |
+          for attempt in $(seq 1 60); do
+            remaining=$(gh api rate_limit --jq .resources.core.remaining)
+            [ "$remaining" -gt 30 ] && break
+            echo "Esperando cuota de publicación GitHub; los archivos ya están guardados como artefactos."
+            sleep 60
+          done
           tag=renacer-1.1-opensuse-r1
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --title 'BYPSSD OS Renacer 1.1 · base openSUSE · candidato 1' --notes-file docs/RELEASE-OPENSUSE.md || gh release view "$tag"
           gh release upload "$tag" "out/BYPSSD-OS-Renacer-1.1-$ARCH.iso" "out/BYPSSD-OS-Renacer-1.1-$ARCH.iso.sha256" "out/package-manifest-opensuse-$ARCH.txt" "out/audit-opensuse-$ARCH.json"
