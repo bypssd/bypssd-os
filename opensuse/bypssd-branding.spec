@@ -1,8 +1,8 @@
 Name: bypssd-branding
 Version: 1.1
-Release: 4
+Release: 5
 Summary: Escritorio BYPSSD OS Renacer
-License: GPL-2.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
+License: GPL-2.0-or-later AND GPL-3.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL: https://bypssd.com
 Vendor: BYPSSD Informática Retro
 Distribution: BYPSSD OS Renacer

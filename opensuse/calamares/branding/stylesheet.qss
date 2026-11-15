@@ -1,0 +1,24 @@
+/* BYPSSD installer: use Calamares' real JobQueue percentage. */
+QWidget#slideshow { background-color: #F5F5F5; }
+QProgressBar#exec-progress {
+    min-height: 26px;
+    max-height: 26px;
+    border: 1px solid #C2C5CA;
+    border-radius: 5px;
+    background-color: #E2E4E8;
+    color: #111111;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+QProgressBar#exec-progress::chunk {
+    background-color: #FFB800;
+    border-radius: 4px;
+}
+QLabel#exec-message {
+    color: #24262A;
+    font-size: 12px;
+    padding: 4px 0px;
+    min-height: 22px;
+}
