@@ -16,8 +16,8 @@ en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instal
 
 - [Compilación openSUSE ARM64/x64](https://github.com/bypssd/bypssd-os/actions/workflows/build-opensuse.yml).
 - [Releases](https://github.com/bypssd/bypssd-os/releases). La nueva candidata se
-  llama `renacer-1.1-opensuse-r3` (ambas arquitecturas publicadas). La revisión r4
-  añade cinco diapositivas durante la instalación y está en preparación.
+  llama `renacer-1.1-opensuse-r3` (ambas arquitecturas publicadas). La revisión r6
+  añade cinco diapositivas, barra con porcentaje real y correcciones del instalador; está en compilación.
 - Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente
   vacío, con índices RPM válidos para ambas arquitecturas.
 
@@ -110,8 +110,25 @@ funcional y no bit a bit. Se publica el manifiesto de paquetes de cada composici
 - Arranque UEFI x64 r3: escritorio KDE y sesión automática comprobados ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43706493860)).
 - ARM64 r3: arranque UEFI, sesión automática y entrada de teclado comprobados en QEMU/HVF.
 - Discover: instalación gráfica de VLC como usuario Live sin privilegios en r1 con las correcciones incorporadas en r3; transacción PackageKit de 12,95 s, paquete oficial aarch64.
-- Instalación completa en disco: pendiente de terminar; Calamares abre y supera las comprobaciones de espacio y UEFI.
+- Instalación completa ARM64 UEFI: finalizada sobre el disco virtual de 32 GiB usando r3 con la configuración GRUB y presentación corregidas. Arranque del disco instalado: en comprobación.
 - Secure Boot y equipos físicos requieren validación aparte.
 
 Los logs completos de compilación quedan en artefactos de Actions durante 30 días
 y se copian a `out/logs/` para las comprobaciones locales.
+
+## Presentación durante la instalación
+
+Cinco pantallas en español: bienvenida a Renacer; LibreOffice y Okular; navegación
+con Chromium y Firefox; aplicaciones con Discover; personalización y Dolphin.
+Cambian cada diez segundos, con iconos SVG propios y transiciones suaves.
+La barra amarilla inferior muestra el porcentaje real calculado por la cola de
+trabajos de Calamares; debajo se indica la operación en curso. No usa una animación
+que simule avances. Fuentes en `opensuse/calamares/branding/`.
+
+La prueba completa detectó en r3 una configuración incompleta de GRUB
+(`KeyError: grubInstall`). r6 define las rutas nativas de grub2-install,
+grub2-mkconfig, grub2-probe y efibootmgr. r4/r5 se cancelaron para incorporar la solución.
+
+Se fuerza el renderizado Qt Quick por software solo en el instalador mediante
+un lanzador propio autorizado por Polkit. Evita zonas negras en GPU virtuales
+y mantiene visibles las diapositivas, la barra real y el porcentaje.

@@ -73,18 +73,37 @@ write(root/'etc/sudoers.d/90-bypssd-live','linux ALL=(ALL) NOPASSWD: ALL\n');(ro
 write(root/'etc/sudoers.d/91-bypssd-admin','%wheel ALL=(ALL:ALL) ALL\n');(root/'etc/sudoers.d/91-bypssd-admin').chmod(0o440)
 write(root/'etc/polkit-1/rules.d/49-bypssd-live.rules','''polkit.addRule(function(action, subject) {
  if (subject.user !== "linux" || !subject.local || !subject.active) return;
- if (action.id === "io.calamares.calamares.pkexec.run") return polkit.Result.YES;
- if (action.id === "org.freedesktop.policykit.exec" && action.lookup("program") === "/usr/bin/calamares") return polkit.Result.YES;
+ if (action.id === "io.calamares.calamares.pkexec.run" || action.id === "com.bypssd.install") return polkit.Result.YES;
+ if (action.id === "org.freedesktop.policykit.exec" && (action.lookup("program") === "/usr/bin/calamares" || action.lookup("program") === "/usr/libexec/bypssd-calamares")) return polkit.Result.YES;
  var allowed = ["package-install", "package-reinstall", "package-remove", "system-sources-refresh", "system-update"];
  for (var i=0; i<allowed.length; i++) if (action.id === "org.freedesktop.packagekit." + allowed[i]) return polkit.Result.YES;
 });
 ''')
 write(root/'etc/polkit-1/rules.d/50-bypssd-admin.rules','polkit.addAdminRule(function(action, subject) { return ["unix-group:wheel"]; });\n')
+write(share/'polkit-1/actions/com.bypssd.install.policy','''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN" "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+<policyconfig>
+ <vendor>BYPSSD Informática Retro</vendor><vendor_url>https://bypssd.com</vendor_url>
+ <action id="com.bypssd.install">
+  <description>Instalar BYPSSD OS</description>
+  <message>Se necesita autorización para instalar BYPSSD OS en el equipo.</message>
+  <icon_name>bypssd-logo</icon_name>
+  <defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin</allow_active></defaults>
+  <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/bypssd-calamares</annotate>
+  <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+ </action>
+</policyconfig>
+''')
+write(payload/'usr/libexec/bypssd-calamares','''#!/bin/sh
+# Keep the installer readable on virtual GPUs and systems without accelerated Qt Quick.
+export QT_QUICK_BACKEND=software
+exec /usr/bin/calamares "$@"
+''');(payload/'usr/libexec/bypssd-calamares').chmod(0o755)
 write(root/'usr/share/applications/bypssd-install.desktop','''[Desktop Entry]
 Type=Application
 Name=Instalar BYPSSD OS
 Comment=Instalar BYPSSD OS Renacer en este equipo
-Exec=pkexec /usr/bin/calamares
+Exec=pkexec /usr/libexec/bypssd-calamares
 Icon=bypssd-logo
 Terminal=false
 Categories=System;

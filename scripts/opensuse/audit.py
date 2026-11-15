@@ -13,5 +13,10 @@ if not (root/'etc/os-release').is_file() or 'ID=bypssd' not in (root/'etc/os-rel
 required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding','pkexec','xf86-input-libinput']
 for n in required:
  if subprocess.run(['rpm','--root',str(root),'-q',n],stdout=subprocess.DEVNULL).returncode:errors.append('Missing '+n)
+boot=(root/'etc/calamares/modules/bootloader.conf').read_text()
+for key in ['grubInstall:', 'grubMkconfig:', 'grubCfg:', 'grubProbe:', 'efiBootMgr:']:
+ if key not in boot:errors.append('Missing installer bootloader key '+key)
+for rel in ['usr/libexec/bypssd-calamares','usr/share/polkit-1/actions/com.bypssd.install.policy','usr/share/calamares/branding/bypssd/show.qml','usr/share/calamares/branding/bypssd/stylesheet.qss']:
+ if not (root/rel).is_file():errors.append('Missing installer branding '+rel)
 print(json.dumps({'repositories':repos,'required_packages':required,'errors':errors},indent=2))
 if errors:raise SystemExit(1)

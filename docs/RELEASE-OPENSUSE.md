@@ -17,3 +17,7 @@ repositorios oficiales y atribuciones técnicas se conservan para evitar confusi
 Candidato: las pruebas reales de arranque, tienda e instalación deben constar en
 README antes de considerarlo listo para uso general. Secure Boot y hardware físico
 no se presuponen compatibles por el hecho de generar una ISO.
+
+Revisión r6: cinco diapositivas en español durante la instalación, barra amarilla
+con porcentaje real y operación en curso. Corrige las claves de comandos GRUB
+para la instalación UEFI y elimina la opción antigua de swap.
