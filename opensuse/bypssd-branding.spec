@@ -1,3 +1,5 @@
+# Calamares supplies this private QML module at runtime; it is not an RPM capability.
+%global __requires_exclude ^qt6qmlimport[(]calamares[.]slideshow[.]1[)]$
 Name: bypssd-branding
 Version: 1.1
 Release: 9
