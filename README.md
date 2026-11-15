@@ -17,7 +17,7 @@ en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instal
 - [Compilación openSUSE ARM64/x64](https://github.com/bypssd/bypssd-os/actions/workflows/build-opensuse.yml).
 - [Paquetes BYPSSD y fuentes](https://github.com/bypssd/bypssd-os/releases): GitHub aloja los RPM propios y sus SRPM, no las ISO públicas.
 - Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente vacío, con índices RPM válidos para ambas arquitecturas.
-- Revisión actual: r8, con corrección del arranque de reserva UEFI y presentación del instalador.
+- Revisión actual: r10, con corrección EFI x64, selector de cuentas y limpieza del menú instalado.
 
 ## ISO completas y SourceForge
 
@@ -159,3 +159,33 @@ La revisión r8 usa compresión Zstandard para el sistema Live: reduce el tiempo
 de generación frente a XZ, a cambio de una ISO algo mayor. Es una opción
 [compatible con KIWI](https://osinside.github.io/kiwi/image_description/elements.html).
 Las ISO completas y sus SHA256 sirven también para publicarlas en SourceForge.
+
+## Revisión r10: correcciones de instalación e inicio de sesión
+
+La fotografía del error x64 mostró que `/boot/efi/EFI/BYPSSD/grub.cfg` no existía.
+El trabajo final de Calamares conserva ese fichero cuando GRUB lo proporciona;
+si falta, genera una configuración usando el UUID y la ruta real de GRUB y la
+copia también a `EFI/BOOT/grub.cfg`. Ambas ramas se han comprobado con las
+herramientas GRUB nativas sobre sistemas de archivos de prueba en las dos arquitecturas.
+Compilación y auditoría r10 correctas: ejecución 43755582221.
+
+SDDM incluye una presentación oscura con amarillo BYPSSD, selector de las cuentas
+existentes y selección inicial de la última cuenta. Solo hay que introducir su
+contraseña. No se incorporan cuentas personales de prueba a la distribución.
+
+El acceso propio a instalar se elimina del menú y del escritorio tras la
+instalación. Las entradas genéricas de Calamares se ocultan mediante archivos
+XDG en `/usr/local/share/applications`, sin editar los archivos oficiales.
+En Live se mantiene el lanzador propio de BYPSSD.
+
+Destino de entrega: `iso_final/aquilas.iso` (x86_64) y
+`iso_final/aquilas-arm64.iso` (aarch64), con un `.sha256` junto a cada ISO.
+No se publican ISO en Releases de GitHub. Las comprobaciones finales de esta
+revisión son de arranque Live; no se realiza una instalación nueva ni se usa Parallels.
+
+Entrega r10 verificada el 15 de noviembre de 2026: SHA256 de ambas ISO
+comprobados nuevamente tras la descarga. Arranque UEFI Live hasta el escritorio
+KDE confirmado en ARM64 (QEMU/HVF local, sin disco) y x64 (Actions 43756813345).
+Capturas locales: `out/qemu-r10-live-only/final.png` y
+`out/r10-x64-boot/desktop-preview.png`. Los registros de las pruebas nativas
+EFI y de SDDM están en `out/logs/r10-native/`, con auditorías sin errores.
