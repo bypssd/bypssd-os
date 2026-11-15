@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Immutable full binary-catalog mirror; never changes RPM headers/signatures."""
 import sys,re
+import urllib.error
 import argparse, bz2, concurrent.futures, gzip, hashlib, json, lzma, os, pathlib, subprocess, time, urllib.request, urllib.parse, xml.etree.ElementTree as E
 P=pathlib.Path
 R='http://linux.duke.edu/metadata/repo'; C='http://linux.duke.edu/metadata/common'
@@ -27,6 +28,29 @@ def gh(*args):
             raise RuntimeError(result.stderr)
         if attempt==7:raise RuntimeError(result.stderr)
         time.sleep(min(60*2**attempt,900))
+def upload_asset(repository, release_id, path, checksum):
+    # Use the upload endpoint directly: gh release upload otherwise looks up the
+    # same release for every RPM, consuming the repository API quota repeatedly.
+    token=os.environ.get('GH_TOKEN')
+    if not token:raise RuntimeError('GH_TOKEN is required inside the runner')
+    url=f'https://uploads.github.com/repos/{repository}/releases/{release_id}/assets?'+urllib.parse.urlencode({'name':path.name})
+    for attempt in range(8):
+        try:
+            with path.open('rb') as body:
+                req=urllib.request.Request(url,data=body,method='POST',headers={'Authorization':'Bearer '+token,'Content-Type':'application/octet-stream','Content-Length':str(path.stat().st_size),'User-Agent':'BYPSSD-catalog-mirror','Accept':'application/vnd.github+json'})
+                with urllib.request.urlopen(req,timeout=600) as response:asset=json.load(response)
+            if asset.get('state')!='uploaded' or asset.get('digest')!='sha256:'+checksum:raise RuntimeError('Uploaded asset checksum mismatch: '+path.name)
+            return
+        except urllib.error.HTTPError as ex:
+            message=ex.read().decode(errors='replace')
+            if ex.code not in (403,429,500,502,503,504) or attempt==7:raise RuntimeError(f'Upload HTTP {ex.code}: {message}') from None
+            print(f'Upload backoff: HTTP {ex.code}, {path.name}',file=sys.stderr,flush=True)
+            time.sleep(min(60*2**attempt,900))
+        except (TimeoutError,ConnectionError) as ex:
+            # A failed response may have committed the asset: let the next run
+            # verify that state instead of blindly uploading a duplicate.
+            raise RuntimeError('Upload connection interrupted; resume to verify '+path.name) from ex
+
 def unpack(data,name):
     if name.endswith('.gz'):return gzip.decompress(data)
     if name.endswith('.xz'):return lzma.decompress(data)
@@ -79,8 +103,6 @@ def inventory(a):
     (root/'plan.json').write_text(json.dumps(plan))
     print(f"Inventory: {len(items)} unique RPMs; {plan['bytes']} bytes; {len(chunks)} release shards", file=sys.stderr,flush=True)
     print(json.dumps({k:plan[k] for k in ('snapshot','unique_packages','bytes','chunks')}))
-    if os.getenv('GITHUB_OUTPUT'):
-        with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('chunks='+json.dumps(chunks)+'\n')
 def upload(a):
     entries=json.loads((P(a.directory)/f'chunk-{a.chunk}.json').read_text());validate_asset_names(entries);tag=entries[0]['tag']
     try:gh('release','view',tag,'--repo',a.repository)
@@ -99,7 +121,7 @@ def upload(a):
         path=P(a.directory)/asset_name(p);path.write_bytes(get(p['url']))
         if path.stat().st_size!=p['size'] or hashlib.new(p['checksum_type'],path.read_bytes()).hexdigest()!=p['checksum']:raise ValueError('RPM checksum mismatch: '+p['name'])
         # Upload only verified bytes. Delete only this disposable downloaded file.
-        gh('release','upload',tag,str(path),'--repo',a.repository);path.unlink()
+        upload_asset(a.repository,rid,path,p['checksum']);path.unlink()
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:list(pool.map(one,entries))
     print(json.dumps({'chunk':a.chunk,'verified_and_uploaded':len(entries)}))
 def finalize(a):
@@ -135,7 +157,7 @@ def finalize(a):
                     if el.tag in ('{'+R+'}header-checksum','{'+R+'}header-size'):entry.remove(el)
             entry.find('{'+R+'}location').set('href','repodata/'+name);(dest/name).write_bytes(data)
         (dest/'repomd.xml').write_bytes(E.tostring(repomd,encoding='utf-8',xml_declaration=True))
-    (out/'catalog-summary.json').write_text(json.dumps(dict(status='complete', **{k:plan[k] for k in ('snapshot','unique_packages','bytes','chunks')}),indent=2))
+    (out/'catalog-summary.json').write_text(json.dumps(dict(status='complete', publication_run=os.environ.get('GITHUB_RUN_ID'), **{k:plan[k] for k in ('snapshot','unique_packages','bytes','chunks')}),indent=2))
     (out/'bypssd.repo').write_bytes(P('branding/config/bypssd-github.repo').read_bytes())
     (out/'index.html').write_text('<!doctype html><meta charset="utf-8"><title>BYPSSD OS · Repositorio</title><h1>BYPSSD OS</h1><p>Catálogo binario completo para ARM64 y x64, servido desde GitHub.</p><p><a href="bypssd.repo">Configuración DNF</a> · <a href="catalog-summary.json">Inventario verificado</a></p>')
     (out/'.nojekyll').touch();print('COMPLETE: all package assets verified; metadata ready')

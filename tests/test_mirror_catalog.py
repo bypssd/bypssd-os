@@ -1,3 +1,4 @@
+import io,os
 import gzip, hashlib, importlib.util, json, tempfile, unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -6,6 +7,16 @@ import xml.etree.ElementTree as ET
 spec=importlib.util.spec_from_file_location('mirror',Path(__file__).parents[1]/'scripts/mirror-catalog.py')
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 class MirrorTests(unittest.TestCase):
+ def test_streamed_upload_validates_digest(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   p=Path(tmp)/'test.rpm';p.write_bytes(b'RPM test bytes');digest=hashlib.sha256(p.read_bytes()).hexdigest()
+   def send(request,timeout):
+    self.assertEqual(request.data.read(),p.read_bytes())
+    self.assertEqual(request.get_header('Content-length'),str(p.stat().st_size))
+    self.assertTrue(request.full_url.startswith('https://uploads.github.com/repos/bypssd/bypssd-os/'))
+    return io.BytesIO(json.dumps({'state':'uploaded','digest':'sha256:'+digest}).encode())
+   with patch.dict(os.environ,{'GH_TOKEN':'test-placeholder'}),patch.object(m.urllib.request,'urlopen',send):m.upload_asset('bypssd/bypssd-os','1',p,digest)
+
  def test_normalized_names_and_collisions(self):
   p={'name':'app-0.7^2026+git.noarch.rpm','tag':'one','checksum':'a'}
   self.assertEqual(m.asset_name(p),'app-0.7.2026.git.noarch.rpm')

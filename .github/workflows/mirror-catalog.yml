@@ -10,8 +10,16 @@ on:
         description: Reanudar el inventario inmutable de un run anterior (opcional)
         required: false
         default: ''
+      batch:
+        description: Tanda reanudable de dos releases (se avanza automáticamente)
+        default: '0'
+        required: true
+      attempt:
+        description: Reintento automático de la tanda
+        default: '0'
+        required: true
 permissions:
-  actions: read
+  actions: write
   contents: write
   pages: write
   id-token: write
@@ -24,6 +32,9 @@ jobs:
     timeout-minutes: 90
     outputs:
       chunks: ${{ steps.plan.outputs.chunks }}
+      has_more: ${{ steps.plan.outputs.has_more }}
+      next_batch: ${{ steps.plan.outputs.next_batch }}
+      plan_run: ${{ steps.plan.outputs.plan_run }}
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y zstd
@@ -44,12 +55,19 @@ jobs:
         env:
           SNAPSHOT: ${{ inputs.snapshot }}
           RESUME_RUN: ${{ inputs.resume_run }}
+          BATCH: ${{ inputs.batch }}
         run: |
           if [ -z "$RESUME_RUN" ]; then
             python3 scripts/mirror-catalog.py inventory --snapshot "$SNAPSHOT" > catalog-inventory.json
-          else
-            python3 -c 'import json,os; p=json.load(open("out/catalog/plan.json")); open(os.environ["GITHUB_OUTPUT"],"a").write("chunks="+json.dumps(p["chunks"])+"\n")'
           fi
+          python3 - <<'PYCODE'
+          import json,os
+          p=json.load(open('out/catalog/plan.json')); n=int(os.environ['BATCH']); chunks=p['chunks'][n*2:(n+1)*2]
+          if not chunks:raise SystemExit('Invalid batch index')
+          outputs={'chunks':json.dumps(chunks),'has_more':str((n+1)*2<len(p['chunks'])).lower(),'next_batch':str(n+1),'plan_run':os.environ['RESUME_RUN'] or os.environ['GITHUB_RUN_ID']}
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+           for k,v in outputs.items():f.write(k+'='+v+'\n')
+          PYCODE
       - uses: actions/upload-artifact@v4
         with:
           name: catalog-plan
@@ -69,7 +87,7 @@ jobs:
     timeout-minutes: 350
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 2
       matrix:
         chunk: ${{ fromJSON(needs.inventory.outputs.chunks) }}
     steps:
@@ -82,7 +100,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/mirror-catalog.py upload --chunk '${{ matrix.chunk }}'
+  continue:
+    needs: [inventory, packages]
+    if: needs.inventory.outputs.has_more == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Continuar con la siguiente tanda inmutable
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLAN_RUN: ${{ needs.inventory.outputs.plan_run }}
+          NEXT_BATCH: ${{ needs.inventory.outputs.next_batch }}
+          SNAPSHOT: ${{ inputs.snapshot }}
+        run: gh workflow run mirror-catalog.yml --repo "$GITHUB_REPOSITORY" -f snapshot="$SNAPSHOT" -f resume_run="$PLAN_RUN" -f batch="$NEXT_BATCH" -f attempt=0
+  retry:
+    needs: [inventory, packages]
+    if: always() && needs.inventory.result == 'success' && needs.packages.result == 'failure' && fromJSON(inputs.attempt) < 3
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Reanudar archivos pendientes tras un error de transferencia
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLAN_RUN: ${{ needs.inventory.outputs.plan_run }}
+          BATCH: ${{ inputs.batch }}
+          ATTEMPT: ${{ inputs.attempt }}
+          SNAPSHOT: ${{ inputs.snapshot }}
+        run: gh workflow run mirror-catalog.yml --repo "$GITHUB_REPOSITORY" -f snapshot="$SNAPSHOT" -f resume_run="$PLAN_RUN" -f batch="$BATCH" -f attempt="$((ATTEMPT+1))"
   metadata:
+    if: needs.inventory.outputs.has_more == 'false'
     environment:
       name: github-pages
     needs: [inventory, packages]

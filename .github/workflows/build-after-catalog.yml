@@ -6,8 +6,28 @@ on:
 permissions:
   contents: write
 jobs:
-  build:
+  ready:
     if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          SOURCE_RUN: ${{ github.event.workflow_run.id }}
+        run: |
+          python3 - <<'PYCODE'
+          import json,os,urllib.request
+          ready=False
+          try:
+           with urllib.request.urlopen('https://bypssd.github.io/bypssd-os/catalog-summary.json',timeout=30) as r:p=json.load(r)
+           ready=p.get('status')=='complete' and str(p.get('publication_run'))==os.environ['SOURCE_RUN']
+          except Exception:pass
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('ready='+str(ready).lower()+'\n')
+          PYCODE
+  build:
+    needs: ready
+    if: needs.ready.outputs.ready == 'true'
     strategy:
       fail-fast: false
       matrix:

@@ -50,3 +50,9 @@ dos arquitecturas después de una publicación completa y exitosa. El branding
 1.0-8 instala la configuración exclusiva y desactiva los otros repositorios por
 medio de overrides, sin modificar archivos de paquetes oficiales. Una auditoría
 falla la compilación si queda activo otro repositorio o una URL ajena a BYPSSD.
+
+La carga se divide en tandas automáticas de dos releases para limitar las colas
+y las consultas a la API. Cada tanda verifica y omite los assets existentes; al
+terminar inicia la siguiente conservando el inventario original. Los errores de
+transferencia se reintentan hasta tres veces; no se publica un catálogo incompleto.
+La última tanda es la única que despliega Pages y autoriza las ISO r9.
