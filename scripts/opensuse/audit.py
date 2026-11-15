@@ -18,5 +18,7 @@ for key in ['grubInstall:', 'grubMkconfig:', 'grubCfg:', 'grubProbe:', 'efiBootM
  if key not in boot:errors.append('Missing installer bootloader key '+key)
 for rel in ['usr/libexec/bypssd-calamares','usr/share/polkit-1/actions/com.bypssd.install.policy','usr/share/calamares/branding/bypssd/show.qml','usr/share/calamares/branding/bypssd/stylesheet.qss']:
  if not (root/rel).is_file():errors.append('Missing installer branding '+rel)
+if 'Defaults:%wheel !targetpw' not in (root/'etc/sudoers.d/91-bypssd-admin').read_text():errors.append('Administrator sudo would request root password')
+if '/home/*/Desktop/bypssd-install.desktop' not in (root/'etc/calamares/modules/shellprocess-bypssd-cleanup.conf').read_text():errors.append('Installed desktop keeps Live installer shortcut')
 print(json.dumps({'repositories':repos,'required_packages':required,'errors':errors},indent=2))
 if errors:raise SystemExit(1)

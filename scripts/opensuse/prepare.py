@@ -70,7 +70,7 @@ SUPPORT_URL="https://bypssd.com"
 BUG_REPORT_URL="https://github.com/bypssd/bypssd-os/issues"
 ''')
 write(root/'etc/sudoers.d/90-bypssd-live','linux ALL=(ALL) NOPASSWD: ALL\n');(root/'etc/sudoers.d/90-bypssd-live').chmod(0o440)
-write(root/'etc/sudoers.d/91-bypssd-admin','%wheel ALL=(ALL:ALL) ALL\n');(root/'etc/sudoers.d/91-bypssd-admin').chmod(0o440)
+write(root/'etc/sudoers.d/91-bypssd-admin','Defaults:%wheel !targetpw\n%wheel ALL=(ALL:ALL) ALL\n');(root/'etc/sudoers.d/91-bypssd-admin').chmod(0o440)
 write(root/'etc/polkit-1/rules.d/49-bypssd-live.rules','''polkit.addRule(function(action, subject) {
  if (subject.user !== "linux" || !subject.local || !subject.active) return;
  if (action.id === "io.calamares.calamares.pkexec.run" || action.id === "com.bypssd.install") return polkit.Result.YES;
