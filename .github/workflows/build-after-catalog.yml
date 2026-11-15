@@ -17,12 +17,15 @@ jobs:
           SOURCE_RUN: ${{ github.event.workflow_run.id }}
         run: |
           python3 - <<'PYCODE'
-          import json,os,urllib.request
+          import json,os,time,urllib.request
           ready=False
-          try:
-           with urllib.request.urlopen('https://bypssd.github.io/bypssd-os/catalog-summary.json',timeout=30) as r:p=json.load(r)
-           ready=p.get('status')=='complete' and str(p.get('publication_run'))==os.environ['SOURCE_RUN']
-          except Exception:pass
+          for attempt in range(12):
+           try:
+            with urllib.request.urlopen('https://bypssd.github.io/bypssd-os/catalog-summary.json?run='+os.environ['SOURCE_RUN'],timeout=30) as r:p=json.load(r)
+            ready=p.get('status')=='complete' and str(p.get('publication_run'))==os.environ['SOURCE_RUN']
+           except Exception:pass
+           if ready:break
+           time.sleep(10)
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('ready='+str(ready).lower()+'\n')
           PYCODE
   build:
