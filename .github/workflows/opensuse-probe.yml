@@ -12,7 +12,8 @@ jobs:
         run: |
           docker run --rm opensuse/tumbleweed bash -exc '
             zypper --non-interactive refresh
-            zypper --non-interactive install --no-recommends python3-kiwi kiwi-systemdeps-iso createrepo_c rpm-build
+            zypper search -s kiwi
+            zypper --non-interactive install python3-kiwi createrepo_c rpm-build
             zypper search -s --match-exact calamares discover6 discover6-backend-packagekit PackageKit-backend-zypp appstream-glib AppStream plasma6-desktop plasma6-session-wayland patterns-kde-kde_plasma branding-upstream openSUSE-release
             kiwi-ng --version
           '
