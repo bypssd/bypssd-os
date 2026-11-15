@@ -21,6 +21,17 @@ en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instal
 - Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente
   vacío, con índices RPM válidos para ambas arquitecturas.
 
+Las ISO completas superan el límite de 2 GiB por archivo de GitHub Releases. Se
+publican en dos partes por arquitectura, con checksums individuales y de la ISO.
+Para descargarlas y reconstruir la imagen sin guardar copias adicionales:
+
+```sh
+python3 scripts/download-opensuse-iso.py aarch64
+python3 scripts/download-opensuse-iso.py x86_64
+```
+
+El resultado en `out/` es una ISO completa; las partes sueltas no se pueden arrancar.
+
 ## Repositorios y Discover
 
 El sistema usa los repositorios oficiales de openSUSE para los paquetes de la base;
@@ -93,7 +104,8 @@ funcional y no bit a bit. Se publica el manifiesto de paquetes de cada composici
 ## Validación
 
 - Herramientas nativas: KIWI 10.3.11 y paquetes Discover/ZYpp/Calamares disponibles.
-- Índices públicos BYPSSD Updates: verificar conteo cero y checksum de `primary`.
+- Índices públicos BYPSSD Updates: conteo cero y SHA256 de `primary` comprobados.
+- Refresco con ZYpp nativo: correcto en ARM64 y x64 ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43699679512)).
 - Las nuevas ISO necesitan completar la compilación y las pruebas reales de
   arranque, Discover e instalación. No se afirman verificadas todavía.
 - Secure Boot y equipos físicos requieren validación aparte.

@@ -42,6 +42,6 @@ pkg=f'bypssd-opensuse-1.1-{a.arch}'
 try:gh('release','view',pkg)
 except subprocess.CalledProcessError:gh('release','create',pkg,'--prerelease','--title',f'BYPSSD branding y fuentes · openSUSE {a.arch}','--notes','Branding BYPSSD nativo de openSUSE; RPM propio y fuente, sin firma de producción.')
 old={x['name'] for x in json.loads(gh('release','view',pkg,'--json','assets'))['assets']}
-for path in root.rglob('*.rpm'):
+for path in root.rglob('bypssd-branding-1.1*.rpm'):
  if path.name not in old:gh('release','upload',pkg,str(path));old.add(path.name)
 print(json.dumps(record,indent=2))

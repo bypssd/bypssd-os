@@ -48,10 +48,7 @@ jobs:
           done
           tag=renacer-1.1-opensuse-r1
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --title 'BYPSSD OS Renacer 1.1 · base openSUSE · candidato 1' --notes-file docs/RELEASE-OPENSUSE.md || gh release view "$tag"
-          gh release upload "$tag" "out/BYPSSD-OS-Renacer-1.1-$ARCH.iso" "out/BYPSSD-OS-Renacer-1.1-$ARCH.iso.sha256" "out/package-manifest-opensuse-$ARCH.txt" "out/audit-opensuse-$ARCH.json"
-          pkg="bypssd-opensuse-1.1-$ARCH"
-          gh release view "$pkg" >/dev/null 2>&1 || gh release create "$pkg" --prerelease --title "BYPSSD · fuentes y branding openSUSE $ARCH" --notes-file docs/RELEASE-OPENSUSE.md
-          gh release upload "$pkg" out/opensuse/rpms/*.rpm out/opensuse/srpms/*.rpm
+          python3 scripts/opensuse/publish-parts.py out "$ARCH" --tag "$tag"
       - name: Conservar logs completos
         if: always()
         uses: actions/upload-artifact@v4
