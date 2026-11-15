@@ -5,7 +5,7 @@ Valencia. KDE Plasma, español de España, amarillo #FFB800, negro y blanco.
 
 ## Estado real
 
-Se está reconstruyendo la versión 1.1 sobre **openSUSE Tumbleweed** para ARM64 y
+Se ha reconstruido la versión 1.1 sobre **openSUSE Tumbleweed** para ARM64 y
 x64. No se puede sustituir el repositorio de una ISO Fedora por openSUSE: sus RPM
 no son intercambiables. Las ISO 1.0 anteriores siguen siendo Fedora; su historial
 se conserva en [HISTORIAL-FEDORA-1.0.md](docs/HISTORIAL-FEDORA-1.0.md).
@@ -16,8 +16,8 @@ en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instal
 
 - [Compilación openSUSE ARM64/x64](https://github.com/bypssd/bypssd-os/actions/workflows/build-opensuse.yml).
 - [Releases](https://github.com/bypssd/bypssd-os/releases). La nueva candidata se
-  llama `renacer-1.1-opensuse-r1`; no debe considerarse disponible hasta que termine
-  la compilación de cada arquitectura.
+  llama `renacer-1.1-opensuse-r3` (ambas arquitecturas publicadas). La revisión r4
+  añade cinco diapositivas durante la instalación y está en preparación.
 - Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente
   vacío, con índices RPM válidos para ambas arquitecturas.
 
@@ -51,7 +51,7 @@ configurar y distribuir una clave de firma adecuada.
 Discover incluye `discover6-backend-packagekit`, `PackageKit-backend-zypp`,
 `PackageKit` y `AppStream`. Es una tienda de aplicaciones: no todos los RPM tienen
 metadatos para aparecer en ella. Las pruebas de búsqueda e instalación reales se
-registrarán debajo; instalar un backend no equivale por sí solo a comprobar la tienda.
+documentan debajo. Se ha probado una instalación real desde la interfaz de Discover.
 
 Tumbleweed es una distribución rolling: sus repositorios evolucionan. Sus paquetes
 y actualizaciones se descargan de sus servidores, sin mantener un espejo completo
@@ -106,8 +106,11 @@ funcional y no bit a bit. Se publica el manifiesto de paquetes de cada composici
 - Herramientas nativas: KIWI 10.3.11 y paquetes Discover/ZYpp/Calamares disponibles.
 - Índices públicos BYPSSD Updates: conteo cero y SHA256 de `primary` comprobados.
 - Refresco con ZYpp nativo: correcto en ARM64 y x64 ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43699679512)).
-- Las nuevas ISO necesitan completar la compilación y las pruebas reales de
-  arranque, Discover e instalación. No se afirman verificadas todavía.
+- Compilación r3: correcta en ambas arquitecturas ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43704624342)).
+- Arranque UEFI x64 r3: escritorio KDE y sesión automática comprobados ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43706493860)).
+- ARM64 r3: arranque UEFI, sesión automática y entrada de teclado comprobados en QEMU/HVF.
+- Discover: instalación gráfica de VLC como usuario Live sin privilegios en r1 con las correcciones incorporadas en r3; transacción PackageKit de 12,95 s, paquete oficial aarch64.
+- Instalación completa en disco: pendiente de terminar; Calamares abre y supera las comprobaciones de espacio y UEFI.
 - Secure Boot y equipos físicos requieren validación aparte.
 
 Los logs completos de compilación quedan en artefactos de Actions durante 30 días

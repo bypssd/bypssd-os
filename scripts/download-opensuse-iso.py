@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download and assemble a BYPSSD ISO, verifying each part and the full image."""
 import argparse,hashlib,json,pathlib,urllib.request
-p=argparse.ArgumentParser();p.add_argument('arch',choices=['aarch64','x86_64']);p.add_argument('--tag',default='renacer-1.1-opensuse-r1');p.add_argument('--out',default='out');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('arch',choices=['aarch64','x86_64']);p.add_argument('--tag',default='renacer-1.1-opensuse-r3');p.add_argument('--out',default='out');a=p.parse_args()
 base=f'https://github.com/bypssd/bypssd-os/releases/download/{a.tag}/'
 with urllib.request.urlopen(base+f'iso-parts-{a.arch}.json',timeout=180) as response:m=json.load(response)
 assert m['architecture']==a.arch and m['iso']==f'BYPSSD-OS-Renacer-1.1-{a.arch}.iso'

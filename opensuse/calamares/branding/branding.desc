@@ -23,6 +23,7 @@ style:
   SidebarTextCurrent: '#000000'
   SidebarBackgroundCurrent: '#FFB800'
 
-slideshow: [ wallpaper.png ]
+slideshow: show.qml
+slideshowAPI: 2
 uploadServer:
   type: none
