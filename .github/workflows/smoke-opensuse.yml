@@ -1,11 +1,19 @@
 name: Arrancar ISO openSUSE en QEMU
 on:
   workflow_dispatch:
+    inputs:
+      source_run:
+        default: '43699024603'
+        required: true
+  workflow_run:
+    workflows: ['Construir BYPSSD sobre openSUSE']
+    types: [completed]
 permissions:
   actions: read
   contents: read
 jobs:
   boot:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -13,7 +21,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: '43699024603'
+          run-id: ${{ github.event.workflow_run.id || inputs.source_run }}
           name: opensuse-delivery-x86_64
           path: incoming
       - name: Arrancar la ISO exacta en un equipo virtual de prueba

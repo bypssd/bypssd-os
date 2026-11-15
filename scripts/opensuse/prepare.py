@@ -44,7 +44,10 @@ terminal-font: "Unifont Regular 16"
 """)
 copy(r/'branding/licenses',share/'bypssd/licenses');copy(r/'assets/LICENSE.txt',share/'bypssd/licenses/ASSETS.txt')
 write(share/'bypssd/README.txt','BYPSSD OS Renacer 1.1\nDistribución independiente basada en openSUSE Tumbleweed.\nNo es un producto oficial de openSUSE ni de SUSE.\nSe conservan las licencias, firmas y atribuciones originales.\n')
-write(share/'metainfo/org.bypssd.bypssd.metainfo.xml','''<?xml version="1.0"?><component type="operating-system"><id>org.bypssd.bypssd</id><name>BYPSSD OS Renacer</name><summary>Sistema para oficina y educación</summary><metadata_license>CC0-1.0</metadata_license><project_license>LicenseRef-mixed</project_license><url type="homepage">https://bypssd.com</url><developer id="com.bypssd"><name>BYPSSD Informática Retro</name></developer></component>''')
+write(share/'metainfo/com.bypssd.bypssd.metainfo.xml','''<?xml version="1.0"?><component type="operating-system"><id>com.bypssd.bypssd</id><name>BYPSSD OS Renacer</name><summary>Sistema para oficina y educación</summary><metadata_license>CC0-1.0</metadata_license><project_license>LicenseRef-mixed</project_license><url type="homepage">https://bypssd.com</url><developer id="com.bypssd"><name>BYPSSD Informática Retro</name></developer></component>''')
+meta=E.parse(share/'metainfo/com.bypssd.bypssd.metainfo.xml').getroot()
+collection=E.Element('components',version='1.0',origin='bypssd');collection.append(meta)
+write(share/'swcatalog/xml/bypssd-os.xml',E.tostring(collection,encoding='unicode'))
 root=desc/'root';copy(r/'opensuse/calamares',root/'etc/calamares');copy(r/'opensuse/bypssd-updates.repo',root/'etc/zypp/repos.d/bypssd-updates.repo')
 for n in ('kdeglobals','ksplashrc','kscreenlockerrc'):
  text=(r/'branding/config'/n).read_text().replace('widgetStyle=BYPSSD','widgetStyle=Breeze');write(root/'etc/xdg'/n,text);write(root/'etc/skel/.config'/n,text)

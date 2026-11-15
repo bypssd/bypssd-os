@@ -10,7 +10,7 @@ if set(repos)!={'opensuse-oss','bypssd-updates'}:errors.append('Unexpected activ
 for n,r in repos.items():
  if 'fedora' in str(r).lower():errors.append('Fedora repository remains')
 if not (root/'etc/os-release').is_file() or 'ID=bypssd' not in (root/'etc/os-release').read_text():errors.append('Missing BYPSSD identity')
-required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding']
+required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding','pkexec','xf86-input-libinput']
 for n in required:
  if subprocess.run(['rpm','--root',str(root),'-q',n],stdout=subprocess.DEVNULL).returncode:errors.append('Missing '+n)
 print(json.dumps({'repositories':repos,'required_packages':required,'errors':errors},indent=2))

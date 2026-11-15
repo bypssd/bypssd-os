@@ -18,7 +18,11 @@ images:
   productIcon: logo.png
   productWelcome: wallpaper.png
 style:
-  sidebarBackground: '#101010'
-  sidebarText: '#FFFFFF'
-  sidebarTextSelect: '#000000'
-  sidebarTextHighlight: '#FFB800'
+  SidebarBackground: '#101010'
+  SidebarText: '#FFFFFF'
+  SidebarTextCurrent: '#000000'
+  SidebarBackgroundCurrent: '#FFB800'
+
+slideshow: [ wallpaper.png ]
+uploadServer:
+  type: none
