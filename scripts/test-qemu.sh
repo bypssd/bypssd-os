@@ -3,7 +3,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 project=$(pwd -P)
-test -f out/BYPSSD-OS-Renacer-1.0-aarch64.iso
+iso=${BYPSSD_TEST_ISO:-$project/out/BYPSSD-OS-Renacer-1.1-aarch64.iso}
+test -f "$iso"
 command -v qemu-system-aarch64 >/dev/null
 run="$project/out/qemu-test"
 mkdir -p "$run"
@@ -19,7 +20,7 @@ if [ "${BYPSSD_TEST_SERIAL_SOCKET:-0}" = 1 ]; then
 fi
 cdrom=()
 if [ "${BYPSSD_TEST_INSTALLED:-0}" != 1 ]; then
-  cdrom=(-drive "if=none,id=livecd,format=raw,media=cdrom,readonly=on,file=$project/out/BYPSSD-OS-Renacer-1.0-aarch64.iso" -device scsi-cd,drive=livecd,bus=scsi0.0,bootindex=0)
+  cdrom=(-drive "if=none,id=livecd,format=raw,media=cdrom,readonly=on,file=$iso" -device scsi-cd,drive=livecd,bus=scsi0.0,bootindex=0)
 fi
 exec qemu-system-aarch64 \
   -name BYPSSD-ISO-Test -machine virt -accel hvf -cpu host -smp 4 -m 4096 \
