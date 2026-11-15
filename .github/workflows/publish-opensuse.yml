@@ -1,0 +1,28 @@
+name: Publicar ISO openSUSE en partes
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        required: true
+        default: '43699024603'
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.source_run }}
+          name: opensuse-delivery-${{ matrix.arch }}
+          path: incoming
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/opensuse/publish-parts.py incoming '${{ matrix.arch }}'
