@@ -61,9 +61,10 @@ se conservan. No se atribuyen a BYPSSD compilaciones realizadas por terceros.
 
 Referencia: [openSUSE Trademark Guidelines](https://en.opensuse.org/openSUSE:Trademark_guidelines)
 y [anuncio oficial](https://news.opensuse.org/2009/03/02/opensuse-trademark-guidelines-released/).
-El acceso automatizado al texto completo devolvió HTTP 403 en esta sesión; no se
-presenta este trabajo como una certificación legal. Se ha aplicado una identidad
-propia sin usar los signos distintivos del proveedor ni afirmar respaldo oficial.
+La descarga directa del PDF devolvió HTTP 403; se consultaron sus apartados
+indexados sobre distribuciones modificadas y referencias de compatibilidad. Se
+aplica una identidad propia sin usar sus signos como marca del producto ni afirmar
+respaldo oficial. Se permiten menciones técnicas en rutas; se conserva la procedencia.
 
 ## Reproducir desde el Mac
 

@@ -6,7 +6,7 @@ project=$(pwd -P)
 iso=${BYPSSD_TEST_ISO:-$project/out/BYPSSD-OS-Renacer-1.1-aarch64.iso}
 test -f "$iso"
 command -v qemu-system-aarch64 >/dev/null
-run="$project/out/qemu-test"
+run=${BYPSSD_QEMU_RUN_DIR:-$project/out/qemu-test}
 mkdir -p "$run"
 if [ ! -f "$run/vars.fd" ]; then
   cp /opt/homebrew/share/qemu/edk2-arm-vars.fd "$run/vars.fd"
