@@ -1,4 +1,4 @@
-# BYPSSD OS Renacer · migración a openSUSE
+# BYPSSD OS Renacer 1.1
 
 Sistema independiente para oficina y educación de BYPSSD Informática Retro,
 Valencia. KDE Plasma, español de España, amarillo #FFB800, negro y blanco.
@@ -15,22 +15,30 @@ están desactivados. Los RPM ya publicados se conservan como historial y no se u
 en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instalar Linux.
 
 - [Compilación openSUSE ARM64/x64](https://github.com/bypssd/bypssd-os/actions/workflows/build-opensuse.yml).
-- [Releases](https://github.com/bypssd/bypssd-os/releases). La nueva candidata se
-  llama `renacer-1.1-opensuse-r3` (ambas arquitecturas publicadas). La revisión r8
-  añade cinco diapositivas, barra con porcentaje real y correcciones del instalador; está en compilación.
-- Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente
-  vacío, con índices RPM válidos para ambas arquitecturas.
+- [Paquetes BYPSSD y fuentes](https://github.com/bypssd/bypssd-os/releases): GitHub aloja los RPM propios y sus SRPM, no las ISO públicas.
+- Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente vacío, con índices RPM válidos para ambas arquitecturas.
+- Revisión actual: r8, con corrección del arranque de reserva UEFI y presentación del instalador.
 
-Las ISO completas superan el límite de 2 GiB por archivo de GitHub Releases. Se
-publican en dos partes por arquitectura, con checksums individuales y de la ISO.
-Para descargarlas y reconstruir la imagen sin guardar copias adicionales:
+## ISO completas y SourceForge
+
+Las ISO finales se guardan en `out/`, con un archivo `.iso.sha256` junto a cada una.
+Son imágenes completas para publicar en SourceForge; no necesitan dividirse.
+La subida a SourceForge queda en manos de Andy y todavía no se ha configurado un enlace público.
+
+GitHub Actions se utiliza para compilarlas en runners nativos. Los artefactos de
+transferencia son temporales (un día de retención) y se retiran una vez descargados,
+verificados y utilizados por la prueba de arranque. No se publican ISO en Releases.
+Las antiguas Releases que solo contenían ISO están archivadas como borradores.
+
+Para transferir una compilación propia ya terminada al Mac:
 
 ```sh
-python3 scripts/download-opensuse-iso.py aarch64
-python3 scripts/download-opensuse-iso.py x86_64
+python3 scripts/download-opensuse-artifact.py NUMERO_DE_EJECUCION aarch64
+python3 scripts/download-opensuse-artifact.py NUMERO_DE_EJECUCION x86_64
 ```
 
-El resultado en `out/` es una ISO completa; las partes sueltas no se pueden arrancar.
+Se necesita la sesión existente de `gh`. El script verifica SHA256 antes de mover
+la ISO a `out/`. Los logs de compilación se conservan por separado durante 30 días.
 
 ## Repositorios y Discover
 
