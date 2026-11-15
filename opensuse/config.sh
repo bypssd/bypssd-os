@@ -7,7 +7,7 @@ printf 'bypssd\n' > /etc/hostname
 printf 'LANG=es_ES.UTF-8\n' > /etc/locale.conf
 printf 'KEYMAP=es\n' > /etc/vconsole.conf
 printf 'DISPLAYMANAGER="sddm"\n' > /etc/sysconfig/displaymanager
-systemctl enable NetworkManager display-manager bypssd-live.service
+systemctl enable NetworkManager display-manager-legacy.service bypssd-live.service
 systemctl disable sshd.service 2>/dev/null || true
 systemctl set-default graphical.target
 passwd -l root

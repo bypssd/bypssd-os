@@ -9,11 +9,9 @@ BuildArch: noarch
 Provides: plasma6-branding = 6.8.2
 Provides: sddm-branding = 0.21.0
 Provides: sddm-qt6-branding = 0.21.0
-Provides: calamares-branding = 3.4.2
 Conflicts: plasma6-branding-openSUSE
 Conflicts: sddm-branding-openSUSE
 Conflicts: sddm-qt6-branding-openSUSE
-Conflicts: calamares-branding-upstream
 %description
 Identidad visual propia. Base openSUSE; no es un producto oficial de openSUSE ni SUSE.
 %prep

@@ -23,8 +23,21 @@ jobs:
           df -h .
       - name: Construir ISO nativa con paquetes openSUSE
         run: |
+          set -o pipefail
           mkdir -p out/logs
           docker run --name bypssd-opensuse --privileged -v "$PWD:/workspace" -w /workspace opensuse/tumbleweed bash scripts/opensuse/build.sh 2>&1 | tee out/logs/opensuse-build-console.log
+      - name: Guardar ISO y RPM antes de publicar
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensuse-delivery-${{ matrix.arch }}
+          compression-level: 0
+          retention-days: 14
+          path: |
+            out/BYPSSD-OS-Renacer-1.1-*.iso*
+            out/opensuse/rpms/*.rpm
+            out/opensuse/srpms/*.rpm
+            out/package-manifest-opensuse-*.txt
+            out/audit-opensuse-*.json
       - name: Publicar candidato y fuentes propias
         run: |
           tag=renacer-1.1-opensuse-r1

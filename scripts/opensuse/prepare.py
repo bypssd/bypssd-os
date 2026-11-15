@@ -97,7 +97,7 @@ pkgs=E.SubElement(image,'packages',type='image')
 for line in (r/'opensuse/packages.txt').read_text().splitlines():
  if line and not line.startswith('#'):E.SubElement(pkgs,'package',name=line)
 for n in (['grub2-arm64-efi'] if arch=='aarch64' else ['grub2-x86_64-efi','grub2-i386-pc']):E.SubElement(pkgs,'package',name=n)
-for n in ('plasma6-branding-openSUSE','sddm-branding-openSUSE','sddm-qt6-branding-openSUSE','plymouth-branding-openSUSE','grub2-branding-openSUSE','calamares-branding-upstream'):E.SubElement(pkgs,'ignore',name=n)
+for n in ('plasma6-branding-openSUSE','sddm-branding-openSUSE','sddm-qt6-branding-openSUSE','plymouth-branding-openSUSE','grub2-branding-openSUSE'):E.SubElement(pkgs,'ignore',name=n)
 pkgs=E.SubElement(image,'packages',type='iso');E.SubElement(pkgs,'package',name='dracut-kiwi-live')
 E.indent(image,space='  ');E.ElementTree(image).write(desc/'BYPSSD.kiwi',encoding='utf-8',xml_declaration=True)
 copy(r/'opensuse/config.sh',desc/'config.sh');(desc/'config.sh').chmod(0o755)

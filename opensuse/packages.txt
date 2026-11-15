@@ -34,6 +34,7 @@ plymouth
 plymouth-plugin-script
 plymouth-dracut
 calamares
+calamares-branding-upstream
 calamares-lang
 dolphin
 konsole
