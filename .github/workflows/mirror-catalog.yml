@@ -11,6 +11,7 @@ on:
         required: false
         default: ''
 permissions:
+  actions: read
   contents: write
   pages: write
   id-token: write
@@ -37,6 +38,8 @@ jobs:
           cp -r imported-plan/out/catalog/* out/catalog/
           cp imported-plan/catalog-inventory.json .
           gh run download "$RESUME_RUN" --name catalog-chunks --dir out/catalog
+      - name: Verificar el generador de metadatos
+        run: python3 -m unittest discover -s tests -p 'test_mirror_catalog.py'
       - id: plan
         env:
           SNAPSHOT: ${{ inputs.snapshot }}
@@ -80,6 +83,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/mirror-catalog.py upload --chunk '${{ matrix.chunk }}'
   metadata:
+    environment:
+      name: github-pages
     needs: [inventory, packages]
     runs-on: ubuntu-24.04
     timeout-minutes: 90
