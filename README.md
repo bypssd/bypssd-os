@@ -33,8 +33,8 @@ Las antiguas Releases que solo contenían ISO están archivadas como borradores.
 Para transferir una compilación propia ya terminada al Mac:
 
 ```sh
-python3 scripts/download-opensuse-artifact.py NUMERO_DE_EJECUCION aarch64
-python3 scripts/download-opensuse-artifact.py NUMERO_DE_EJECUCION x86_64
+python3 scripts/download-opensuse-fast.py NUMERO_DE_EJECUCION aarch64
+python3 scripts/download-opensuse-fast.py NUMERO_DE_EJECUCION x86_64
 ```
 
 Se necesita la sesión existente de `gh`. El script verifica SHA256 antes de mover
@@ -111,16 +111,15 @@ funcional y no bit a bit. Se publica el manifiesto de paquetes de cada composici
 
 ## Validación
 
-- Herramientas nativas: KIWI 10.3.11 y paquetes Discover/ZYpp/Calamares disponibles.
-- Índices públicos BYPSSD Updates: conteo cero y SHA256 de `primary` comprobados.
-- Refresco con ZYpp nativo: correcto en ARM64 y x64 ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43699679512)).
-- Compilación r3: correcta en ambas arquitecturas ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43704624342)).
-- Arranque UEFI x64 r3: escritorio KDE y sesión automática comprobados ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43706493860)).
-- ARM64 r3: arranque UEFI, sesión automática y entrada de teclado comprobados en QEMU/HVF.
-- Discover: instalación gráfica de VLC tanto en Live como en el sistema ARM64 instalado. En el sistema instalado pide la contraseña del usuario administrador y completa la instalación. Los iconos aparecen correctamente al recargar Discover tras el primer refresco del catálogo.
-- Instalación completa ARM64 UEFI: finalizada sobre el disco virtual de 32 GiB usando r3 con la configuración GRUB y presentación corregidas. Arranque UEFI del disco instalado e inicio de sesión del usuario creado: correctos.
-- Imágenes para equipos UEFI de la arquitectura correspondiente. ARM64 no implica compatibilidad con todos los modelos de placas ni arranque nativo en un Mac Apple Silicon.
-- Secure Boot y equipos físicos requieren validación aparte.
+- Compilación y auditoría r8: correctas en ARM64 y x64 ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43725037977)).
+- SHA256 de los artefactos y de las dos ISO completas verificados antes de su entrega local.
+- ARM64 r8: arranque UEFI Live hasta KDE Plasma en QEMU/HVF, con la ISO en solo lectura y sin disco duro conectado.
+- x64 r8: arranque UEFI Live hasta KDE Plasma ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43726136936)).
+- Por petición de Andy, no se ha instalado la revisión r8: su comprobación final se limita al arranque Live.
+- En las pruebas anteriores se verificaron la instalación ARM64, la contraseña propia del administrador, la retirada de los permisos Live y la instalación gráfica de VLC desde Discover. La configuración EFI de reserva se probó en el disco virtual de aquella instalación antes de incorporarla a r8.
+- BYPSSD Updates: índices públicos vacíos y SHA256 de `primary` comprobados; refresco ZYpp correcto en ambas arquitecturas ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43699679512)).
+- Imágenes para equipos UEFI de la arquitectura correspondiente. ARM64 no implica arranque nativo en un Mac Apple Silicon ni compatibilidad con todas las placas.
+- Hardware físico y Secure Boot siguen pendientes de validación.
 
 Los logs completos de compilación quedan en artefactos de Actions durante 30 días
 y se copian a `out/logs/` para las comprobaciones locales.
