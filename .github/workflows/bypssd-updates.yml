@@ -1,0 +1,39 @@
+name: Publicar BYPSSD Updates
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crear índices RPM válidos sin paquetes
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y createrepo-c
+          mkdir -p out/empty-rpms site/tumbleweed/aarch64/updates site/tumbleweed/x86_64/updates
+          createrepo_c out/empty-rpms
+          for arch in aarch64 x86_64; do cp -r out/empty-rpms/repodata "site/tumbleweed/$arch/updates/"; done
+          cp opensuse/bypssd-updates.repo site/
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>BYPSSD Updates</title><h1>BYPSSD OS · Updates</h1><p>Canal propio para BYPSSD OS basado en openSUSE Tumbleweed. Actualmente vacío.</p><a href="bypssd-updates.repo">Configuración del repositorio</a>' > site/index.html
+          touch site/.nojekyll
+          python3 - <<'PY'
+          import gzip,pathlib,xml.etree.ElementTree as E
+          for arch in ('aarch64','x86_64'):
+           p=pathlib.Path('site/tumbleweed')/arch/'updates/repodata'
+           assert (p/'repomd.xml').is_file()
+           f=next(p.glob('*primary.xml.gz')); assert E.fromstring(gzip.decompress(f.read_bytes())).get('packages')=='0'
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4

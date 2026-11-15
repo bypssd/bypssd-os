@@ -1,0 +1,9 @@
+[bypssd-updates]
+name=BYPSSD OS - Actualizaciones propias
+baseurl=https://bypssd.github.io/bypssd-os/tumbleweed/$basearch/updates/
+enabled=1
+autorefresh=1
+priority=90
+gpgcheck=1
+repo_gpgcheck=0
+pkg_gpgcheck=1
