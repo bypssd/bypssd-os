@@ -1,0 +1,45 @@
+name: Construir BYPSSD sobre openSUSE
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 150
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar runner aislado
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache
+          sudo modprobe loop
+          df -h .
+      - name: Construir ISO nativa con paquetes openSUSE
+        run: |
+          mkdir -p out/logs
+          docker run --name bypssd-opensuse --privileged -v "$PWD:/workspace" -w /workspace opensuse/tumbleweed bash scripts/opensuse/build.sh 2>&1 | tee out/logs/opensuse-build-console.log
+      - name: Publicar candidato y fuentes propias
+        run: |
+          tag=renacer-1.1-opensuse-r1
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --title 'BYPSSD OS Renacer 1.1 · base openSUSE · candidato 1' --notes-file docs/RELEASE-OPENSUSE.md || gh release view "$tag"
+          gh release upload "$tag" "out/BYPSSD-OS-Renacer-1.1-$ARCH.iso" "out/BYPSSD-OS-Renacer-1.1-$ARCH.iso.sha256" "out/package-manifest-opensuse-$ARCH.txt" "out/audit-opensuse-$ARCH.json"
+          pkg="bypssd-opensuse-1.1-$ARCH"
+          gh release view "$pkg" >/dev/null 2>&1 || gh release create "$pkg" --prerelease --title "BYPSSD · fuentes y branding openSUSE $ARCH" --notes-file docs/RELEASE-OPENSUSE.md
+          gh release upload "$pkg" out/opensuse/rpms/*.rpm out/opensuse/srpms/*.rpm
+      - name: Conservar logs completos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opensuse-logs-${{ matrix.arch }}
+          path: |
+            out/logs/
+            out/*opensuse*.json
+            out/opensuse/result/*.log
+          retention-days: 30
