@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """Immutable full binary-catalog mirror; never changes RPM headers/signatures."""
-import sys
+import sys,re
 import argparse, bz2, concurrent.futures, gzip, hashlib, json, lzma, os, pathlib, subprocess, time, urllib.request, urllib.parse, xml.etree.ElementTree as E
 P=pathlib.Path
 R='http://linux.duke.edu/metadata/repo'; C='http://linux.duke.edu/metadata/common'
+def asset_name(p):return re.sub('[^A-Za-z0-9._-]','.',p['name'])
+def validate_asset_names(packages):
+    seen={}
+    for p in packages:
+        key=(p['tag'],asset_name(p))
+        if key in seen and seen[key]!=p['checksum']:raise ValueError('Normalized asset name collision: '+str(key))
+        seen[key]=p['checksum']
 def get(url):
     for attempt in range(5):
         try:
@@ -67,6 +74,7 @@ def inventory(a):
     if len(chunks)>256:raise RuntimeError('Catalog exceeds one GitHub matrix; split runs before uploading')
     mapping={(p['name'],p['checksum']):p['tag'] for p in items}
     for p in packages:p['tag']=mapping[p['name'],p['checksum']]
+    validate_asset_names(items)
     plan={'snapshot':a.snapshot,'repository':a.repository,'repos':repos,'packages':packages,'chunks':chunks,'unique_packages':len(items),'bytes':sum(x['size'] for x in items)}
     (root/'plan.json').write_text(json.dumps(plan))
     print(f"Inventory: {len(items)} unique RPMs; {plan['bytes']} bytes; {len(chunks)} release shards", file=sys.stderr,flush=True)
@@ -74,7 +82,7 @@ def inventory(a):
     if os.getenv('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('chunks='+json.dumps(chunks)+'\n')
 def upload(a):
-    entries=json.loads((P(a.directory)/f'chunk-{a.chunk}.json').read_text());tag=entries[0]['tag']
+    entries=json.loads((P(a.directory)/f'chunk-{a.chunk}.json').read_text());validate_asset_names(entries);tag=entries[0]['tag']
     try:gh('release','view',tag,'--repo',a.repository)
     except RuntimeError as ex:
         if not any(x in str(ex).lower() for x in ('not found','http 404')):raise
@@ -83,12 +91,12 @@ def upload(a):
     pages=json.loads(gh('api',f'repos/{a.repository}/releases/{rid}/assets?per_page=100','--paginate','--slurp'))
     existing={x['name']:x for page in pages for x in page}
     def one(p):
-        old=existing.get(p['name'])
+        old=existing.get(asset_name(p))
         if old:
             if old['size']!=p['size'] or (old.get('digest') and old['digest']!='sha256:'+p['checksum']):raise ValueError('Existing asset mismatch: '+p['name'])
             return
         if p['size']>=2*1024**3:raise ValueError('GitHub asset exceeds 2 GiB: '+p['name'])
-        path=P(a.directory)/p['name'];path.write_bytes(get(p['url']))
+        path=P(a.directory)/asset_name(p);path.write_bytes(get(p['url']))
         if path.stat().st_size!=p['size'] or hashlib.new(p['checksum_type'],path.read_bytes()).hexdigest()!=p['checksum']:raise ValueError('RPM checksum mismatch: '+p['name'])
         # Upload only verified bytes. Delete only this disposable downloaded file.
         gh('release','upload',tag,str(path),'--repo',a.repository);path.unlink()
@@ -102,9 +110,10 @@ def finalize(a):
         rid=gh('api',f'repos/{a.repository}/releases/tags/{tag}','--jq','.id')
         pages=json.loads(gh('api',f'repos/{a.repository}/releases/{rid}/assets?per_page=100','--paginate','--slurp'));assets={x['name']:x for page in pages for x in page}
         for p in entries:
-            x=assets.get(p['name'])
+            x=assets.get(asset_name(p))
             if not x or x['state']!='uploaded' or x['size']!=p['size'] or x.get('digest')!='sha256:'+p['checksum']:raise ValueError('Incomplete mirror: '+p['name'])
-    mapping={(p['repo'],p['name'],p['checksum']):p['tag'] for p in plan['packages']}
+    validate_asset_names(plan['packages'])
+    mapping={(p['repo'],p['name'],p['checksum']):(p['tag'],asset_name(p)) for p in plan['packages']}
     for repo in plan['repos']:
         src=root/'metadata'/repo['id']/'repodata';dest=out/'45'/repo['id']/'repodata';dest.mkdir(parents=True)
         repomd=E.fromstring((src/'repomd.xml').read_bytes())
@@ -116,8 +125,8 @@ def finalize(a):
             if kind=='primary':
                 primary=E.fromstring(unpack(data,name))
                 for p in primary.findall('{'+C+'}package'):
-                    loc=p.find('{'+C+'}location');filename=P(loc.get('href')).name;digest=p.find('{'+C+'}checksum').text;tag=mapping[repo['id'],filename,digest]
-                    loc.attrib.clear();loc.set('href',f'https://github.com/{a.repository}/releases/download/{tag}/{filename}')
+                    loc=p.find('{'+C+'}location');filename=P(loc.get('href')).name;digest=p.find('{'+C+'}checksum').text;tag,asset=mapping[repo['id'],filename,digest]
+                    loc.attrib.clear();loc.set('href',f'https://github.com/{a.repository}/releases/download/{tag}/{asset}')
                 raw=E.tostring(primary,encoding='utf-8',xml_declaration=True);data=gzip.compress(raw,mtime=0);name=hashlib.sha256(data).hexdigest()+'-primary.xml.gz'
                 for key,blob in [('checksum',data),('open-checksum',raw)]:
                     el=entry.find('{'+R+'}'+key);el.set('type','sha256');el.text=hashlib.sha256(blob).hexdigest()

@@ -6,6 +6,10 @@ import xml.etree.ElementTree as ET
 spec=importlib.util.spec_from_file_location('mirror',Path(__file__).parents[1]/'scripts/mirror-catalog.py')
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 class MirrorTests(unittest.TestCase):
+ def test_normalized_names_and_collisions(self):
+  p={'name':'app-0.7^2026+git.noarch.rpm','tag':'one','checksum':'a'}
+  self.assertEqual(m.asset_name(p),'app-0.7.2026.git.noarch.rpm')
+  with self.assertRaisesRegex(ValueError,'collision'):m.validate_asset_names([p,dict(p,name='app-0.7.2026.git.noarch.rpm',checksum='b')])
  def test_verified_assets_and_rewritten_metadata(self):
   with tempfile.TemporaryDirectory() as tmp:
    root=Path(tmp);src=root/'metadata/aarch64/base/repodata';src.mkdir(parents=True)
