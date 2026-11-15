@@ -31,14 +31,14 @@ jobs:
         with:
           name: opensuse-delivery-${{ matrix.arch }}
           compression-level: 0
-          retention-days: 14
+          retention-days: 1
           path: |
             out/BYPSSD-OS-Renacer-1.1-*.iso*
             out/opensuse/rpms/*.rpm
             out/opensuse/srpms/*.rpm
             out/package-manifest-opensuse-*.txt
             out/audit-opensuse-*.json
-      - name: Publicar candidato y fuentes propias
+      - name: Publicar solo paquetes BYPSSD y fuentes
         run: |
           for attempt in $(seq 1 60); do
             remaining=$(gh api rate_limit --jq .resources.core.remaining)
@@ -46,9 +46,7 @@ jobs:
             echo "Esperando cuota de publicación GitHub; los archivos ya están guardados como artefactos."
             sleep 60
           done
-          tag=renacer-1.1-opensuse-r8
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --title 'BYPSSD OS Renacer 1.1 · base openSUSE · candidato 8' --notes-file docs/RELEASE-OPENSUSE.md || gh release view "$tag"
-          python3 scripts/opensuse/publish-parts.py out "$ARCH" --tag "$tag"
+          python3 scripts/opensuse/publish-packages.py out "$ARCH" --tag renacer-1.1-opensuse-r8
       - name: Conservar logs completos
         if: always()
         uses: actions/upload-artifact@v4
