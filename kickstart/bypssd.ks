@@ -15,8 +15,8 @@ clearpart --all
 part / --size=20000 --fstype=ext4
 shutdown
 
-url --url=https://download.fedoraproject.org/pub/fedora/linux/releases/45/Everything/aarch64/os/
-repo --name=bypssd-fedora-updates --baseurl=https://download.fedoraproject.org/pub/fedora/linux/updates/45/Everything/aarch64/
+url --url=https://bypssd.github.io/bypssd-os/45/aarch64/base/
+repo --name=bypssd-updates --baseurl=https://bypssd.github.io/bypssd-os/45/aarch64/updates/
 repo --name=bypssd --baseurl=http://127.0.0.1:8765/ --cost=1
 
 %packages --exclude-weakdeps

@@ -1,6 +1,6 @@
 Name:           bypssd-branding
 Version:        1.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Identidad visual de BYPSSD OS Renacer
 License:        GPL-2.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL:            https://bypssd.com
@@ -77,6 +77,7 @@ cp assets/logo-256.png %{buildroot}%{_datadir}/cockpit/branding/bypssd/logo.png
 cp assets/logo-48.png %{buildroot}%{_datadir}/cockpit/branding/bypssd/favicon.ico
 cp assets/logo-256.png %{buildroot}%{_datadir}/cockpit/branding/bypssd/apple-touch-icon.png
 install -Dm644 branding/config/anaconda-cockpit.conf %{buildroot}/etc/anaconda/cockpit/conf.d/90-bypssd.conf
+install -Dm644 branding/config/bypssd-github.repo %{buildroot}/etc/yum.repos.d/bypssd-github.repo
 install -Dm644 branding/config/bypssd-repositories.repo %{buildroot}%{_datadir}/dnf5/repos.override.d/90-bypssd.repo
 
 %posttrans
@@ -91,6 +92,7 @@ install -Dm644 branding/config/bypssd-repositories.repo %{buildroot}%{_datadir}/
 %{_datadir}/cockpit/branding/bypssd
 %{_datadir}/dnf5/repos.override.d/90-bypssd.repo
 %config(noreplace) /etc/anaconda/cockpit/conf.d/90-bypssd.conf
+%config(noreplace) /etc/yum.repos.d/bypssd-github.repo
 %{_datadir}/color-schemes/BYPSSDRenacer.colors
 %{_datadir}/plasma/look-and-feel/com.bypssd.desktop
 %{_datadir}/sddm/themes/bypssd

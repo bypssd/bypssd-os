@@ -1,5 +1,10 @@
 name: Construir ISO BYPSSD
 on:
+  workflow_call:
+    inputs:
+      architecture:
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
       architecture:
@@ -28,9 +33,9 @@ jobs:
           docker exec bypssd-ci bash scripts/ci-build.sh rpms
       - name: Publicar RPM y fuentes
         run: |
-          tag="packages-1.0-7-$ARCH"
+          tag="packages-1.0-8-$ARCH"
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --title "BYPSSD OS · Paquetes $ARCH" --notes-file docs/packages-r5.md
-          for file in out/rpms/bypssd-branding-1.0-7.fc45.noarch.rpm out/rpms/bypssd-release-identity-1.0-1.fc45.noarch.rpm "out/rpms/bypssd-breeze-style-6.8.2-1.fc45.$ARCH.rpm" out/srpms/*.src.rpm; do
+          for file in out/rpms/bypssd-branding-1.0-8.fc45.noarch.rpm out/rpms/bypssd-release-identity-1.0-1.fc45.noarch.rpm "out/rpms/bypssd-breeze-style-6.8.2-1.fc45.$ARCH.rpm" out/srpms/*.src.rpm; do
             name=$(basename "$file")
             if ! gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fxq "$name"; then
               gh release upload "$tag" "$file"
@@ -43,12 +48,12 @@ jobs:
           cd out
           sha256sum -c "BYPSSD-OS-Renacer-1.0-$ARCH.iso.sha256"
           cd ..
-          gh release view renacer-1.0-r7 >/dev/null 2>&1 || gh release create renacer-1.0-r7 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 7' --notes-file docs/release-r5.md
-          gh release upload renacer-1.0-r7 "out/BYPSSD-OS-Renacer-1.0-$ARCH.iso" "out/BYPSSD-OS-Renacer-1.0-$ARCH.iso.sha256" "out/package-manifest-$ARCH.txt" "out/branding-audit-$ARCH.json"
+          gh release view renacer-1.0-r9 >/dev/null 2>&1 || gh release create renacer-1.0-r9 --prerelease --title 'BYPSSD OS Renacer 1.0 · revisión 9' --notes-file docs/release-r9.md
+          gh release upload renacer-1.0-r9 "out/BYPSSD-OS-Renacer-1.0-$ARCH.iso" "out/BYPSSD-OS-Renacer-1.0-$ARCH.iso.sha256" "out/package-manifest-$ARCH.txt" "out/branding-audit-$ARCH.json" "out/repository-audit-$ARCH.json"
       - name: Descargar y publicar las aplicaciones comunes
         run: |
           docker exec bypssd-ci bash scripts/ci-build.sh common
-          gh release upload "packages-1.0-7-$ARCH" out/common-packages/$ARCH/*.rpm
+          gh release upload "packages-1.0-8-$ARCH" out/common-packages/$ARCH/*.rpm
       - name: Conservar registros
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,7 +1,7 @@
-# User-facing labels only. Original signatures, URLs and repository IDs remain.
+# Disable upstream repositories; signatures and attribution remain original.
 [fedora*]
-name=BYPSSD OS - Base del sistema $releasever - $basearch
+name=BYPSSD OS - Base desactivada
+enabled=0
 [updates*]
-name=BYPSSD OS - Actualizaciones $releasever - $basearch
-[updates-testing*]
-name=BYPSSD OS - Actualizaciones de prueba $releasever - $basearch
+name=BYPSSD OS - Canal externo desactivado
+enabled=0

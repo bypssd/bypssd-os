@@ -21,7 +21,7 @@ ET.SubElement(prefs,'type',image='iso',primary='true',flags='dmsquash',filesyste
 ET.SubElement(prefs.find('type'),'bootloader',name='grub2',grub_template=template,console='console',timeout='5')
 for key,value in [('version','1.0.0'),('packagemanager','dnf5'),('locale','es_ES'),('keytable','es'),('timezone','Europe/Madrid'),('release-version','45')]:
     ET.SubElement(prefs,key).text=value
-for alias,path,priority in [('bypssd','dir:///workspace/out/rpms','1'),('base',f'https://download.fedoraproject.org/pub/fedora/linux/releases/45/Everything/{arch}/os/','99'),('updates',f'https://download.fedoraproject.org/pub/fedora/linux/updates/45/Everything/{arch}/','99')]:
+for alias,path,priority in [('bypssd','dir:///workspace/out/rpms','1'),('bypssd-base',f'https://bypssd.github.io/bypssd-os/45/{arch}/base/','99'),('bypssd-updates',f'https://bypssd.github.io/bypssd-os/45/{arch}/updates/','99')]:
     repo=ET.SubElement(image,'repository',type='rpm-md',alias=alias,priority=priority,package_gpgcheck='false')
     ET.SubElement(repo,'source',path=path)
 bootstrap=ET.SubElement(image,'packages',type='bootstrap')

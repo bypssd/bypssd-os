@@ -10,6 +10,14 @@ con KDE Plasma 6.8.2 y base Fedora Linux 45. Identificador del sistema: `bypssd`
 - Sesión en vivo con instalación mediante Anaconda y cuenta definida por el usuario.
 - No se ha accedido ni modificado Parallels ni instalado Linux en el disco del Mac.
 
+## Migración del catálogo completo (en curso)
+
+Se está publicando el catálogo binario completo (115.097 RPM, 214 GB) en GitHub,
+no solo las aplicaciones de la ISO. [Diseño, estado y activación](docs/CATALOGO-COMPLETO.md).
+Las ISO r8 enlazadas debajo siguen con la configuración anterior. Una compilación
+r9 para ambas arquitecturas se lanzará automáticamente solo cuando termine y se
+verifique el espejo completo. No se afirma que r9 esté publicada todavía.
+
 ## Descargas
 
 Las dos arquitecturas comparten esta release:

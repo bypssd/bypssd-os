@@ -19,3 +19,15 @@ import shutil
 for name in ('org.fedoraproject.fedora.desktop','org.fedoraproject.fedoradark.desktop','org.fedoraproject.fedoralight.desktop'):
  path=Path('/usr/share/plasma/look-and-feel')/name
  if path.is_dir() and not (path/'metadata.json').exists():shutil.rmtree(path)
+
+# The packaged BYPSSD catalog is the only enabled package download source.
+# Preserve official .repo files intact; administrator overrides survive upgrades.
+import configparser
+ids=set()
+for path in Path('/etc/yum.repos.d').glob('*.repo'):
+ config=configparser.RawConfigParser(strict=False);config.read(path);ids.update(config.sections())
+if 'bypssd-base' in ids and 'bypssd-updates' in ids:
+ overrides=configparser.RawConfigParser()
+ for name in sorted(ids):overrides[name]={'enabled':'1' if name in ('bypssd-base','bypssd-updates') else '0'}
+ target=Path('/etc/dnf/repos.override.d/99-bypssd-exclusive.repo');target.parent.mkdir(parents=True,exist_ok=True)
+ with target.open('w') as f:overrides.write(f)

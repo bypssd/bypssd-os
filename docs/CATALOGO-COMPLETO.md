@@ -44,3 +44,9 @@ Para actualizar, ejecutar el workflow con un identificador nuevo; solo se public
 los índices cuando todos los lotes han terminado. No borrar releases antiguas que
 puedan seguir referenciadas por cachés de clientes. La copia de un catálogo completo
 puede ocupar cientos de GB y tardar horas; no utiliza el VPS de BYPSSD.
+
+El workflow `build-after-catalog.yml` construye automáticamente las ISO r9 de las
+dos arquitecturas después de una publicación completa y exitosa. El branding
+1.0-8 instala la configuración exclusiva y desactiva los otros repositorios por
+medio de overrides, sin modificar archivos de paquetes oficiales. Una auditoría
+falla la compilación si queda activo otro repositorio o una URL ajena a BYPSSD.

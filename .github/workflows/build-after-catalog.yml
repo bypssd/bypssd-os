@@ -1,0 +1,18 @@
+name: ISO con repositorio exclusivo BYPSSD
+on:
+  workflow_run:
+    workflows: ['Catálogo completo BYPSSD en GitHub']
+    types: [completed]
+permissions:
+  contents: write
+jobs:
+  build:
+    if: github.event.workflow_run.conclusion == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [aarch64, x86_64]
+    uses: ./.github/workflows/build-iso.yml
+    with:
+      architecture: ${{ matrix.architecture }}
+    secrets: inherit

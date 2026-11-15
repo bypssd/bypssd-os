@@ -27,7 +27,7 @@ rpms)
   done
   bash scripts/build-rpms.sh 2>&1 | tee out/logs/ci-rpmbuild.log
   test -f "out/rpms/bypssd-breeze-style-6.8.2-1.fc45.$BYPSSD_ARCH.rpm"
-  test -f out/rpms/bypssd-branding-1.0-7.fc45.noarch.rpm
+  test -f out/rpms/bypssd-branding-1.0-8.fc45.noarch.rpm
   test -f out/rpms/bypssd-release-identity-1.0-1.fc45.noarch.rpm
   ;;
 iso)
@@ -35,6 +35,7 @@ iso)
   root=$(cat out/logs/latest-kiwi-run.txt)/result/build/image-root
   rpm --root "$root" -qa --qf '%{NAME}\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort > "out/package-manifest-$BYPSSD_ARCH.txt"
   python3 scripts/audit-image.py "$root" > "out/branding-audit-$BYPSSD_ARCH.json"
+  python3 scripts/audit-repositories.py "$root" > "out/repository-audit-$BYPSSD_ARCH.json"
   ;;
 common)
   mkdir -p "out/common-packages/$BYPSSD_ARCH"
