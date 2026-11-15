@@ -109,7 +109,7 @@ funcional y no bit a bit. Se publica el manifiesto de paquetes de cada composici
 - Compilación r3: correcta en ambas arquitecturas ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43704624342)).
 - Arranque UEFI x64 r3: escritorio KDE y sesión automática comprobados ([ejecución](https://github.com/bypssd/bypssd-os/actions/runs/43706493860)).
 - ARM64 r3: arranque UEFI, sesión automática y entrada de teclado comprobados en QEMU/HVF.
-- Discover: instalación gráfica de VLC como usuario Live sin privilegios en r1 con las correcciones incorporadas en r3; transacción PackageKit de 12,95 s, paquete oficial aarch64.
+- Discover: instalación gráfica de VLC tanto en Live como en el sistema ARM64 instalado. En el sistema instalado pide la contraseña del usuario administrador y completa la instalación. Los iconos aparecen correctamente al recargar Discover tras el primer refresco del catálogo.
 - Instalación completa ARM64 UEFI: finalizada sobre el disco virtual de 32 GiB usando r3 con la configuración GRUB y presentación corregidas. Arranque UEFI del disco instalado e inicio de sesión del usuario creado: correctos.
 - Secure Boot y equipos físicos requieren validación aparte.
 
@@ -121,7 +121,7 @@ y se copian a `out/logs/` para las comprobaciones locales.
 Cinco pantallas en español: bienvenida a Renacer; LibreOffice y Okular; navegación
 con Chromium y Firefox; aplicaciones con Discover; personalización y Dolphin.
 Cambian cada diez segundos, con iconos SVG propios y transiciones suaves.
-La barra amarilla inferior muestra el porcentaje real calculado por la cola de
+La barra amarilla inferior, de 26 píxeles de alto, muestra el porcentaje real calculado por la cola de
 trabajos de Calamares; debajo se indica la operación en curso. No usa una animación
 que simule avances. Fuentes en `opensuse/calamares/branding/`.
 
@@ -137,3 +137,7 @@ La validación instalada detectó también el valor nativo `targetpw` de sudo.
 Se configura `Defaults:%wheel !targetpw` para que el administrador utilice
 su propia contraseña, manteniendo root bloqueado. El acceso directo del instalador
 se retira también del escritorio del usuario creado durante la instalación.
+
+Prueba del administrador: contraseña propia aceptada por sudo y por la instalación
+gráfica de VLC. Se ha comprobado la ausencia de sudo, Polkit y autologin especiales
+de Live en el destino instalado, y el refresco correcto de ambos repositorios.
