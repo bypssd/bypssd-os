@@ -41,3 +41,14 @@ if [ -f /etc/calamares/modules/shellprocess-bypssd-cleanup.conf ]; then
 fi
 # Keep systemd first-boot identity unique.
 truncate -s 0 /etc/machine-id
+
+# Keep only our Live launcher; hide upstream installer entries with XDG overrides.
+# Installed-system cleanup removes the BYPSSD Live launcher separately.
+mkdir -p /usr/local/share/applications
+for desktop in /usr/share/applications/*.desktop; do
+ [ -f "$desktop" ] || continue
+ [ "${desktop##*/}" != bypssd-install.desktop ] || continue
+ if grep -Eq '^(Exec|TryExec)=.*calamares' "$desktop"; then
+  printf '[Desktop Entry]\nType=Application\nName=Instalador del sistema\nHidden=true\n' > "/usr/local/share/applications/${desktop##*/}"
+ fi
+done

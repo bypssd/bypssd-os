@@ -11,10 +11,11 @@ Rectangle {
     property bool compact: height < 740
     property date now: new Date()
     function login() {
-        if (username.text.trim().length && !authenticating) {
+        var chosen = String(users.currentValue || "");
+        if (chosen.length && !authenticating) {
             authenticating = true;
             status.text = "";
-            sddm.login(username.text.trim(), password.text, session.currentIndex);
+            sddm.login(chosen, password.text, session.currentIndex);
         }
     }
     Image { anchors.fill: parent; source: config.background; fillMode: Image.PreserveAspectCrop; opacity: 0.32 }
@@ -47,16 +48,18 @@ Rectangle {
                 Text { text: "Inicia tu sesión"; color: "#F8F9FC"; font.pixelSize: 30; font.weight: Font.DemiBold }
                 Text { text: "BYPSSD OS Renacer"; color: "#9EA6B5"; font.pixelSize: 13; Layout.bottomMargin: 12 }
                 Text { text: "USUARIO"; color: "#AEB5C2"; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1 }
-                TextField {
-                    id: username
+                ComboBox {
+                    id: users
                     Layout.fillWidth: true; Layout.preferredHeight: root.compact ? 44 : 50
-                    text: userModel.lastUser || ""; placeholderText: "Tu nombre de usuario"
-                    enabled: !root.authenticating; color: "#FFFFFF"; placeholderTextColor: "#747E90"
-                    leftPadding: 15; rightPadding: 15; font.pixelSize: 14
-                    selectionColor: "#FFB800"; selectedTextColor: "#101217"
-                    background: Rectangle { radius: 11; color: "#11151C"; border.color: username.activeFocus ? "#FFB800" : "#343C49"; border.width: username.activeFocus ? 2 : 1 }
-                    Accessible.name: "Usuario"
-                    onAccepted: password.forceActiveFocus()
+                    model: userModel; textRole: "realName"; valueRole: "name"
+                    currentIndex: userModel.count > 0 ? Math.max(0, userModel.lastIndex) : -1
+                    displayText: currentIndex >= 0 ? (textAt(currentIndex) || String(currentValue)) : "Elige una cuenta"
+                    enabled: !root.authenticating
+                    palette.text: "#FFFFFF"; palette.buttonText: "#FFFFFF"; palette.base: "#1B222D"; palette.window: "#1B222D"; palette.highlight: "#FFB800"; palette.highlightedText: "#11151C"
+                    contentItem: Text { text: users.displayText; color: "#FFFFFF"; font.pixelSize: 14; leftPadding: 15; rightPadding: 28; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                    background: Rectangle { radius: 11; color: "#11151C"; border.color: users.activeFocus ? "#FFB800" : "#343C49"; border.width: users.activeFocus ? 2 : 1 }
+                    Accessible.name: "Selecciona tu cuenta"
+                    onActivated: { password.clear(); reveal.checked = false; status.text = ""; password.forceActiveFocus(); }
                 }
                 Text { text: "CONTRASEÑA"; color: "#AEB5C2"; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1; Layout.topMargin: 5 }
                 TextField {
@@ -121,5 +124,5 @@ Rectangle {
         target: sddm
         function onLoginFailed() { root.authenticating = false; status.text = "No se ha podido entrar. Comprueba el usuario y la contraseña."; password.clear(); password.forceActiveFocus(); }
     }
-    Component.onCompleted: { if (username.text.length) password.forceActiveFocus(); else username.forceActiveFocus(); }
+    Component.onCompleted: { if (users.currentIndex >= 0) password.forceActiveFocus(); else users.forceActiveFocus(); }
 }

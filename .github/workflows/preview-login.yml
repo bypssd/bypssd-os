@@ -14,6 +14,8 @@ jobs:
           mkdir -p out/logs
           docker run --rm -v "$PWD:/workspace" -w /workspace opensuse/tumbleweed bash -euxc '
             zypper -n install --no-recommends sddm-qt6 qt6-declarative-imports xorg-x11-server-Xvfb ImageMagick dejavu-fonts
+            useradd -M -u 1000 -c "Andy" andy
+            useradd -M -u 1001 -c "Invitado" invitado
             mkdir -p /usr/share/bypssd /tmp/runtime
             chmod 700 /tmp/runtime
             cp assets/logo-256.png assets/wallpaper.png /usr/share/bypssd/

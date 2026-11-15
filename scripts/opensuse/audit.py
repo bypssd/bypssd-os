@@ -22,5 +22,11 @@ if 'Defaults:%wheel !targetpw' not in (root/'etc/sudoers.d/91-bypssd-admin').rea
 if '/home/*/Desktop/bypssd-install.desktop' not in (root/'etc/calamares/modules/shellprocess-bypssd-cleanup.conf').read_text():errors.append('Installed desktop keeps Live installer shortcut')
 if not (root/'usr/libexec/bypssd-efi-config').is_file():errors.append('Missing UEFI fallback config helper')
 if 'shellprocess@bypssd-efi' not in (root/'etc/calamares/settings.conf').read_text():errors.append('Missing UEFI fallback installer job')
+import re
+for desktop in (root/'usr/share/applications').glob('*.desktop'):
+ if desktop.name=='bypssd-install.desktop':continue
+ if re.search(r'^(Exec|TryExec)=.*calamares',desktop.read_text(),re.M):
+  override=root/'usr/local/share/applications'/desktop.name
+  if not override.exists() or 'Hidden=true' not in override.read_text():errors.append('Upstream installer remains visible: '+desktop.name)
 print(json.dumps({'repositories':repos,'required_packages':required,'errors':errors},indent=2))
 if errors:raise SystemExit(1)
