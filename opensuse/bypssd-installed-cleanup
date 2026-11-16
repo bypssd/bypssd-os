@@ -19,6 +19,7 @@ for home in /etc/skel /root /home/*; do
  # Cached KService entries can otherwise retain the removed Live launcher.
  find "$home/.cache" -maxdepth 1 -name 'ksycoca6_*' -type f -delete 2>/dev/null || true
 done
+/usr/libexec/bypssd-hide-admin-launchers
 # Leave a positive install-state marker for audits and troubleshooting.
 install -d /var/lib/bypssd
 printf 'BYPSSD OS Renacer: instalación finalizada\n' > /var/lib/bypssd/installed

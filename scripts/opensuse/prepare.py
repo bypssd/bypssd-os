@@ -13,6 +13,7 @@ def write(dst,text):
  if dst.exists():dst.chmod(dst.stat().st_mode | 0o200)
  dst.write_text(text)
 copy(r/'opensuse/bypssd-efi-config',payload/'usr/libexec/bypssd-efi-config');(payload/'usr/libexec/bypssd-efi-config').chmod(0o755)
+copy(r/'opensuse/bypssd-hide-admin-launchers',payload/'usr/libexec/bypssd-hide-admin-launchers');(payload/'usr/libexec/bypssd-hide-admin-launchers').chmod(0o755)
 copy(r/'opensuse/bypssd-installed-cleanup',payload/'usr/libexec/bypssd-installed-cleanup');(payload/'usr/libexec/bypssd-installed-cleanup').chmod(0o755)
 copy(r/'assets',share/'bypssd');copy(r/'branding/start',share/'bypssd/start');copy(r/'branding/browser',share/'bypssd/browser')
 copy(r/'branding/look-and-feel',share/'plasma/look-and-feel/com.bypssd.desktop')
@@ -100,7 +101,7 @@ write(share/'polkit-1/actions/com.bypssd.install.policy','''<?xml version="1.0" 
 write(payload/'usr/libexec/bypssd-calamares','''#!/bin/sh
 # Keep the installer readable on virtual GPUs and systems without accelerated Qt Quick.
 export QT_QUICK_BACKEND=software
-exec /usr/bin/calamares "$@"
+exec systemd-inhibit --what=idle:sleep --mode=block --who="Instalador BYPSSD OS" --why="Evitar interrupciones durante la instalación" /usr/bin/calamares "$@"
 ''');(payload/'usr/libexec/bypssd-calamares').chmod(0o755)
 write(share/'bypssd/bypssd-install.desktop','''[Desktop Entry]
 Type=Application
@@ -130,6 +131,17 @@ live_initrd=/run/overlay/live/boot/$(uname -m)/loader/initrd
 ln -sfn "$live_initrd" "/boot/initrd-$(uname -r)"
 id linux >/dev/null 2>&1 || useradd -m -c 'Sesión Live BYPSSD' -G users,video,audio linux
 passwd -d linux
+install -d -o linux -g users -m700 /home/linux/.config
+cat >> /home/linux/.config/kscreenlockerrc <<'LIVELOCK'
+
+[Daemon]
+Autolock=false
+LockOnResume=false
+LockOnStart=false
+RequirePassword=false
+LIVELOCK
+chown linux:users /home/linux/.config/kscreenlockerrc
+chmod 600 /home/linux/.config/kscreenlockerrc
 session=$(basename "$(find /usr/share/wayland-sessions -name '*plasma*.desktop' | head -1)")
 mkdir -p /etc/sddm.conf.d
 printf '\\nDISPLAYMANAGER_AUTOLOGIN="linux"\\n' >> /etc/sysconfig/displaymanager

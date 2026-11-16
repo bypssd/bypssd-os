@@ -1,0 +1,25 @@
+#!/usr/bin/python3
+"""Hide privileged file-manager/terminal launchers through supported XDG overrides."""
+from pathlib import Path
+import configparser,json,re
+hidden=[]
+for directory in ['/usr/share/applications','/usr/local/share/applications']:
+ for path in sorted(Path(directory).rglob('*.desktop')):
+  desktop_id=str(path.relative_to(directory)).replace('/','-')
+  if directory=='/usr/local/share/applications' and desktop_id in {h['desktop'] for h in hidden}:continue
+  c=configparser.RawConfigParser(strict=False);c.optionxform=str
+  try:c.read_string(path.read_text(errors='replace'))
+  except (configparser.Error,OSError):continue
+  if not c.has_section('Desktop Entry'):continue
+  d=c['Desktop Entry'];command=d.get('Exec','')+' '+d.get('TryExec','')
+  names=' '.join(v for k,v in d.items() if k=='Name' or k.startswith('Name['))
+  identity=(command+' '+names+' '+path.name).lower()
+  kind='file-manager' if re.search(r'dolphin|file.?manager|file.?explorer|gestor de archivos',identity) else ('terminal' if re.search(r'konsole|xterm|terminal',identity) else None)
+  privileged=(d.get('X-KDE-SubstituteUID','').lower()=='true' or d.get('X-KDE-Username','').lower()=='root' or re.search(r'\b(kdesu|xdg-su|pkexec|sudo|rootshell)\b|super.?user|superusuario|root[-_. ]?(shell|terminal|konsole)',identity))
+  if not kind or not privileged:continue
+  target=Path('/usr/local/share/applications')/desktop_id;target.parent.mkdir(parents=True,exist_ok=True)
+  target.write_text('[Desktop Entry]\nType=Application\nName=Acceso administrativo\nHidden=true\n')
+  hidden.append({'desktop':desktop_id,'kind':kind,'source':str(path)})
+report=Path('/var/lib/bypssd/hidden-admin-launchers.json');report.parent.mkdir(parents=True,exist_ok=True)
+report.write_text(json.dumps(hidden,indent=2)+'\n')
+print('BYPSSD_HIDDEN_ADMIN_LAUNCHERS',json.dumps(hidden))

@@ -20,6 +20,14 @@ for base in [Path('/home'),Path('/etc/skel')]:
  check(not list(base.rglob('bypssd-install.desktop')),'Installer shortcut remains under '+str(base))
 for theme in ['ocean','oxygen']:
  check(Path('/usr/share/sounds',theme,'index.theme').is_file(),'Missing sound theme '+theme)
+admin=json.loads(Path('/var/lib/bypssd/hidden-admin-launchers.json').read_text())
+for item in admin:
+ override=Path('/usr/local/share/applications')/item['desktop']
+ check(override.is_file() and 'Hidden=true' in override.read_text(),'Privileged launcher remains: '+item['desktop'])
+for home in Path('/home').iterdir():
+ cfg=configparser.RawConfigParser();cfg.read(home/'.config/kscreenlockerrc')
+ for key in ['Autolock','LockOnResume','RequirePassword']:
+  check(cfg.get('Daemon',key,fallback='true').lower()!='false','Live lock settings leaked into installed account '+home.name)
 check(Path('/boot/initrd').is_file(),'Missing installed initramfs')
 theme=subprocess.check_output(['bash','-c','. /etc/default/grub; printf "%s" "$GRUB_THEME"'],text=True)
 check(Path(theme).is_file(),'Configured GRUB theme does not exist')

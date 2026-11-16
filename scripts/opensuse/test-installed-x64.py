@@ -54,6 +54,14 @@ try:
  serial=Serial();serial.read(2);serial.command('stty -echo; id; lsblk -o NAME,SIZE,TYPE')
  if 'LIVE_SHUTDOWN_IMAGE_OK' not in serial.command('test -s /boot/initrd && echo LIVE_SHUTDOWN_IMAGE_OK'):raise RuntimeError('Live shutdown initramfs missing')
  click(52,45,True);time.sleep(5);key('meta_l-pgup');time.sleep(2);screenshot('02-welcome')
+ live=serial.command('cat /home/linux/.config/kscreenlockerrc; cat /var/lib/bypssd/hidden-admin-launchers.json; systemd-inhibit --list --no-pager')
+ if 'Autolock=false' not in live or 'LockOnResume=false' not in live or 'RequirePassword=false' not in live:raise RuntimeError('Live lock protection missing')
+ # Reproduce inactivity past KDE's default five-minute automatic lock timeout.
+ print('BYPSSD_LIVE_IDLE_TEST_START',flush=True);bootwait(330);screenshot('02b-live-after-idle')
+ active=serial.command('runuser -u linux -- env XDG_RUNTIME_DIR=/run/user/1000 busctl --user call org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver GetActive')
+ if 'b false' not in active:raise RuntimeError('Live session locked during installer inactivity')
+ print('BYPSSD_LIVE_IDLE_TEST_OK',flush=True)
+
  for _ in range(3):click(887,575);time.sleep(1)
  screenshot('03-partition');click(161,77);click(887,575);time.sleep(1)
  for x,y,value in [(233,60,'BYPSSD QA'),(233,108,'qa'),(233,155,'bypssd-qa'),(233,202,'BypssdQA42'),(390,202,'BypssdQA42')]:

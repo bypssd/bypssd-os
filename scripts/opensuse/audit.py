@@ -32,5 +32,10 @@ for desktop in (root/'usr/share/applications').glob('*.desktop'):
  if re.search(r'^(Exec|TryExec)=.*calamares',desktop.read_text(),re.M):
   override=root/'usr/local/share/applications'/desktop.name
   if not override.exists() or 'Hidden=true' not in override.read_text():errors.append('Upstream installer remains visible: '+desktop.name)
-print(json.dumps({'repositories':repos,'required_packages':required,'errors':errors},indent=2))
+admin=json.loads((root/'var/lib/bypssd/hidden-admin-launchers.json').read_text())
+for item in admin:
+ p=root/'usr/local/share/applications'/item['desktop']
+ if not p.is_file() or 'Hidden=true' not in p.read_text():errors.append('Admin launcher visible: '+item['desktop'])
+if not {'file-manager','terminal'}.issubset({a['kind'] for a in admin}):errors.append('Expected superuser menu launchers were not hidden')
+print(json.dumps({'repositories':repos,'required_packages':required,'hidden_admin_launchers':admin,'errors':errors},indent=2))
 if errors:raise SystemExit(1)

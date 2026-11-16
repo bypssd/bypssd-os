@@ -49,3 +49,6 @@ for desktop in /usr/share/applications/*.desktop; do
   printf '[Desktop Entry]\nType=Application\nName=Instalador del sistema\nHidden=true\n' > "/usr/local/share/applications/${desktop##*/}"
  fi
 done
+
+# The overrides apply to both the Live session and the installed base.
+/usr/libexec/bypssd-hide-admin-launchers
