@@ -46,7 +46,7 @@ jobs:
             echo "Esperando cuota de publicación GitHub; los archivos ya están guardados como artefactos."
             sleep 60
           done
-          python3 scripts/opensuse/publish-packages.py out "$ARCH" --tag renacer-1.1-opensuse-r10
+          python3 scripts/opensuse/publish-packages.py out "$ARCH" --tag renacer-1.1-opensuse-r11
       - name: Conservar logs completos
         if: always()
         uses: actions/upload-artifact@v4

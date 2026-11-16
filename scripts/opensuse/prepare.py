@@ -13,6 +13,7 @@ def write(dst,text):
  if dst.exists():dst.chmod(dst.stat().st_mode | 0o200)
  dst.write_text(text)
 copy(r/'opensuse/bypssd-efi-config',payload/'usr/libexec/bypssd-efi-config');(payload/'usr/libexec/bypssd-efi-config').chmod(0o755)
+copy(r/'opensuse/bypssd-installed-cleanup',payload/'usr/libexec/bypssd-installed-cleanup');(payload/'usr/libexec/bypssd-installed-cleanup').chmod(0o755)
 copy(r/'assets',share/'bypssd');copy(r/'branding/start',share/'bypssd/start');copy(r/'branding/browser',share/'bypssd/browser')
 copy(r/'branding/look-and-feel',share/'plasma/look-and-feel/com.bypssd.desktop')
 p=share/'plasma/look-and-feel/com.bypssd.desktop/contents/defaults';p.write_text(p.read_text().replace('widgetStyle=BYPSSD','widgetStyle=Breeze'))
@@ -49,7 +50,8 @@ write(share/'metainfo/com.bypssd.bypssd.metainfo.xml','''<?xml version="1.0"?><c
 meta=E.parse(share/'metainfo/com.bypssd.bypssd.metainfo.xml').getroot()
 collection=E.Element('components',version='1.0',origin='bypssd');collection.append(meta)
 write(share/'swcatalog/xml/bypssd-os.xml',E.tostring(collection,encoding='unicode'))
-root=desc/'root';copy(r/'opensuse/calamares',root/'etc/calamares');copy(r/'opensuse/bypssd-updates.repo',root/'etc/zypp/repos.d/bypssd-updates.repo')
+root=desc/'root';copy(r/'opensuse/dracut/91bypssd-live',root/'usr/lib/dracut/modules.d/91bypssd-live');
+copy(r/'opensuse/calamares',root/'etc/calamares');copy(r/'opensuse/bypssd-updates.repo',root/'etc/zypp/repos.d/bypssd-updates.repo')
 for n in ('kdeglobals','ksplashrc','kscreenlockerrc'):
  text=(r/'branding/config'/n).read_text().replace('widgetStyle=BYPSSD','widgetStyle=Breeze');write(root/'etc/xdg'/n,text);write(root/'etc/skel/.config'/n,text)
 copy(r/'branding/config/kcm-about-distrorc',root/'etc/skel/.config/kcm-about-distrorc')
@@ -100,7 +102,7 @@ write(payload/'usr/libexec/bypssd-calamares','''#!/bin/sh
 export QT_QUICK_BACKEND=software
 exec /usr/bin/calamares "$@"
 ''');(payload/'usr/libexec/bypssd-calamares').chmod(0o755)
-write(root/'usr/share/applications/bypssd-install.desktop','''[Desktop Entry]
+write(share/'bypssd/bypssd-install.desktop','''[Desktop Entry]
 Type=Application
 Name=Instalar BYPSSD OS
 Comment=Instalar BYPSSD OS Renacer en este equipo
@@ -109,7 +111,7 @@ Icon=bypssd-logo
 Terminal=false
 Categories=System;
 ''')
-copy(root/'usr/share/applications/bypssd-install.desktop',root/'etc/skel/Desktop/bypssd-install.desktop')
+# The installer launcher exists only in the Live overlay, never in the copied base filesystem.
 write(root/'etc/systemd/system/bypssd-live.service','''[Unit]
 Description=Preparar sesión Live BYPSSD
 Before=display-manager.service
@@ -129,8 +131,10 @@ mkdir -p /etc/sddm.conf.d
 printf '\\nDISPLAYMANAGER_AUTOLOGIN="linux"\\n' >> /etc/sysconfig/displaymanager
 printf '[Autologin]\\nUser=linux\\nSession=%s\\nRelogin=false\\n' "$session" > /etc/sddm.conf.d/10-bypssd-live.conf
 install -d -o linux -g users /home/linux/Desktop
-install -o linux -g users -m755 /usr/share/applications/bypssd-install.desktop /home/linux/Desktop/
+install -D -m644 /usr/share/bypssd/bypssd-install.desktop /usr/share/applications/bypssd-install.desktop
+install -o linux -g users -m755 /usr/share/bypssd/bypssd-install.desktop /home/linux/Desktop/
 ''');(root/'usr/libexec/bypssd-live-setup').chmod(0o755)
+write(root/'etc/dracut.conf.d/91-bypssd-live.conf','add_dracutmodules+=" bypssd-live "\n')
 # Browser configuration is supported admin policy, not a patched browser binary.
 copy(r/'branding/browser/master_preferences',root/'etc/chromium/master_preferences')
 copy(r/'branding/browser/firefox-policies.json',root/'etc/firefox/policies/policies.json')

@@ -1,0 +1,25 @@
+#!/bin/bash
+# Run by Calamares inside the installed target, never in the Live session.
+set -euo pipefail
+rm -f /etc/sddm.conf.d/10-bypssd-live.conf /etc/dracut.conf.d/02-livecd.conf /etc/dracut.conf.d/91-bypssd-live.conf
+systemctl disable bypssd-live.service 2>/dev/null || true
+rm -f /etc/systemd/system/bypssd-live.service /etc/sudoers.d/90-bypssd-live /etc/polkit-1/rules.d/49-bypssd-live.rules
+# XDG overrides also hide package-owned launchers and survive cache rebuilds.
+mkdir -p /usr/local/share/applications
+for desktop in /usr/share/applications/*.desktop; do
+ [ -f "$desktop" ] || continue
+ if grep -Eq '^(Exec|TryExec)=.*(calamares|bypssd-install)' "$desktop" || [ "${desktop##*/}" = bypssd-install.desktop ]; then
+  printf '[Desktop Entry]\nType=Application\nName=Instalador del sistema\nHidden=true\n' > "/usr/local/share/applications/${desktop##*/}"
+ fi
+done
+rm -f /usr/share/applications/bypssd-install.desktop
+for home in /etc/skel /root /home/*; do
+ [ -d "$home" ] || continue
+ find "$home" -maxdepth 4 -type f \( -name 'bypssd-install.desktop' -o -name '*calamares*.desktop' \) -delete
+ # Cached KService entries can otherwise retain the removed Live launcher.
+ find "$home/.cache" -maxdepth 1 -name 'ksycoca6_*' -type f -delete 2>/dev/null || true
+done
+# Leave a positive install-state marker for audits and troubleshooting.
+install -d /var/lib/bypssd
+printf 'BYPSSD OS Renacer: instalación finalizada\n' > /var/lib/bypssd/installed
+systemctl enable NetworkManager display-manager-legacy.service

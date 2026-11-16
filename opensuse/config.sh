@@ -36,9 +36,6 @@ mkdir -p /etc/PackageKit
 printf '[Daemon]\nDefaultBackend=zypp\n' > /etc/PackageKit/PackageKit.conf
 # The live account is created only when rd.live.image is present.
 # Calamares removes its autologin/polkit/sudo policy from the target disk.
-if [ -f /etc/calamares/modules/shellprocess-bypssd-cleanup.conf ]; then
- sed -i '/script:/a\  - "rm -f /etc/sudoers.d/90-bypssd-live /etc/polkit-1/rules.d/49-bypssd-live.rules"' /etc/calamares/modules/shellprocess-bypssd-cleanup.conf
-fi
 # Keep systemd first-boot identity unique.
 truncate -s 0 /etc/machine-id
 

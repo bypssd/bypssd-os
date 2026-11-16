@@ -10,7 +10,7 @@ if set(repos)!={'opensuse-oss','bypssd-updates'}:errors.append('Unexpected activ
 for n,r in repos.items():
  if 'fedora' in str(r).lower():errors.append('Fedora repository remains')
 if not (root/'etc/os-release').is_file() or 'ID=bypssd' not in (root/'etc/os-release').read_text():errors.append('Missing BYPSSD identity')
-required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding','pkexec','xf86-input-libinput']
+required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding','pkexec','xf86-input-libinput','ocean-sound-theme6','oxygen6-sounds','plasma6-pa','pipewire-pulseaudio']
 for n in required:
  if subprocess.run(['rpm','--root',str(root),'-q',n],stdout=subprocess.DEVNULL).returncode:errors.append('Missing '+n)
 boot=(root/'etc/calamares/modules/bootloader.conf').read_text()
@@ -19,7 +19,9 @@ for key in ['grubInstall:', 'grubMkconfig:', 'grubCfg:', 'grubProbe:', 'efiBootM
 for rel in ['usr/libexec/bypssd-calamares','usr/share/polkit-1/actions/com.bypssd.install.policy','usr/share/calamares/branding/bypssd/show.qml','usr/share/calamares/branding/bypssd/stylesheet.qss']:
  if not (root/rel).is_file():errors.append('Missing installer branding '+rel)
 if 'Defaults:%wheel !targetpw' not in (root/'etc/sudoers.d/91-bypssd-admin').read_text():errors.append('Administrator sudo would request root password')
-if '/home/*/Desktop/bypssd-install.desktop' not in (root/'etc/calamares/modules/shellprocess-bypssd-cleanup.conf').read_text():errors.append('Installed desktop keeps Live installer shortcut')
+if '/usr/libexec/bypssd-installed-cleanup' not in (root/'etc/calamares/modules/shellprocess-bypssd-cleanup.conf').read_text():errors.append('Missing installed-system cleanup job')
+for rel in ['usr/libexec/bypssd-installed-cleanup','usr/lib/dracut/modules.d/91bypssd-live/remove-media.sh','usr/share/sounds/ocean/index.theme','usr/share/sounds/oxygen/index.theme']:
+ if not (root/rel).is_file():errors.append('Missing '+rel)
 if not (root/'usr/libexec/bypssd-efi-config').is_file():errors.append('Missing UEFI fallback config helper')
 if 'shellprocess@bypssd-efi' not in (root/'etc/calamares/settings.conf').read_text():errors.append('Missing UEFI fallback installer job')
 import re

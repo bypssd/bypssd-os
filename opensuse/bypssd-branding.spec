@@ -2,7 +2,7 @@
 %global __requires_exclude ^qt6qmlimport[(]calamares[.]slideshow[.]1[)]$
 Name: bypssd-branding
 Version: 1.1
-Release: 10
+Release: 11
 Summary: Escritorio BYPSSD OS Renacer
 License: GPL-2.0-or-later AND GPL-3.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL: https://bypssd.com
@@ -45,3 +45,5 @@ cp -a usr %{buildroot}/
 /usr/libexec/bypssd-calamares
 
 /usr/libexec/bypssd-efi-config
+
+/usr/libexec/bypssd-installed-cleanup

@@ -134,3 +134,9 @@ xz-lang
 procps-lang
 kf6-kio-lang
 kf6-kirigami-lang
+
+# KDE sound themes and session audio integration.
+ocean-sound-theme6
+oxygen6-sounds
+plasma6-pa
+pipewire-pulseaudio

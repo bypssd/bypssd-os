@@ -8,3 +8,7 @@ AccentColor=255,184,0
 
 [Icons]
 Theme=breeze-dark
+
+[Sounds]
+Theme=ocean
+Enable=true
