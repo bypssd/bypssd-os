@@ -74,6 +74,7 @@ try:
  active=serial.command('runuser -u linux -- env XDG_RUNTIME_DIR=/run/user/1000 busctl --user call org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver GetActive')
  if 'b false' not in active:raise RuntimeError('Live session locked during installer inactivity')
  print('BYPSSD_LIVE_IDLE_TEST_OK',flush=True)
+ key('shift');time.sleep(1);screenshot('02c-live-awake-without-password')
 
  for _ in range(3):click(887,575);time.sleep(1)
  screenshot('03-partition');click(161,77);click(887,575);time.sleep(1)
