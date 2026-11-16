@@ -98,14 +98,12 @@ finally:
  except Exception:vm.terminate()
  vm.wait(timeout=30);server.shutdown()
 
-# QEMU closes the WAV header on exit. Verify actual non-silent PCM samples.
-import wave,array
-nonzero=False
-with wave.open(str(run/'audio.wav'),'rb') as wav:
- if wav.getsampwidth()!=2:raise RuntimeError('Unexpected audio sample width')
- while True:
-  samples=wav.readframes(65536)
-  if not samples:break
-  if max(map(abs,array.array('h',samples)),default=0)>64:nonzero=True;break
-if not nonzero:raise RuntimeError('The virtual audio output was silent')
-print('BYPSSD_AUDIO_PCM_OK',flush=True)
+# Some QEMU versions leave zero length placeholders; validate actual PCM bytes.
+import array,struct
+raw=(run/'audio.wav').read_bytes()
+if raw[:4]!=b'RIFF' or raw[8:12]!=b'WAVE' or raw[36:40]!=b'data':raise RuntimeError('Unexpected audio container')
+if struct.unpack_from('<H',raw,34)[0]!=16:raise RuntimeError('Unexpected audio sample width')
+peak=max(map(abs,array.array('h',raw[44:])),default=0)
+if peak<=64:raise RuntimeError('The virtual audio output was silent')
+print('BYPSSD_AUDIO_PCM_OK',peak,flush=True)
+result=json.loads((run/'result.json').read_text());result['audio_peak_pcm_s16']=peak;(run/'result.json').write_text(json.dumps(result,indent=2)+'\n')
