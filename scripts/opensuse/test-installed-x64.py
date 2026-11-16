@@ -49,6 +49,7 @@ class Serial:
  def close(self):self.s.close();self.log.close()
 bootstrap='curl -fsS http://10.0.2.2:8765/qa.sh | sudo bash'
 serial=None
+idle_seconds=int(os.environ.get('BYPSSD_QA_IDLE_SECONDS') or '330');assert 0<=idle_seconds<=600
 try:
  bootwait(100);screenshot('01-live');key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; lsblk -o NAME,SIZE,TYPE')
@@ -70,8 +71,9 @@ try:
  live=serial.command('cat /home/linux/.config/kscreenlockerrc; cat /var/lib/bypssd/hidden-admin-launchers.json; systemd-inhibit --list --no-pager')
  if 'Autolock=false' not in live or 'LockOnResume=false' not in live or 'RequirePassword=false' not in live:raise RuntimeError('Live lock protection missing')
  # Reproduce inactivity past KDE's default five-minute automatic lock timeout.
- print('BYPSSD_LIVE_IDLE_TEST_START',flush=True);bootwait(330);screenshot('02b-live-after-idle')
- active=serial.command('runuser -u linux -- env XDG_RUNTIME_DIR=/run/user/1000 busctl --user call org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver GetActive')
+ print('BYPSSD_LIVE_IDLE_TEST_START',idle_seconds,flush=True);bootwait(idle_seconds);screenshot('02b-live-after-idle')
+ active=serial.command('runuser -u linux -- env XDG_RUNTIME_DIR=/run/user/1000 busctl --address=unix:path=/run/user/1000/bus call org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver GetActive')
+ if 'Failed' in active:raise RuntimeError('Unable to query Live session bus')
  if 'b false' not in active:raise RuntimeError('Live session locked during installer inactivity')
  print('BYPSSD_LIVE_IDLE_TEST_OK',flush=True)
  key('shift');time.sleep(1);screenshot('02c-live-awake-without-password')
@@ -102,14 +104,14 @@ try:
  serial=Serial();serial.read(2);serial.command('stty -echo; id; cat /proc/cmdline')
  result=serial.command('curl -fsS http://10.0.2.2:8765/check.py -o /tmp/bypssd-check.py; python3 /tmp/bypssd-check.py')
  if '"installed_checks": "passed"' not in result:raise RuntimeError('Installed audit failed')
- audio=serial.command('runuser -u qa -- env XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active pipewire wireplumber pipewire-pulse')
+ audio=serial.command('runuser -u qa -- env XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus systemctl --user is-active pipewire wireplumber pipewire-pulse')
  if sum(line.strip()=='active' for line in audio.splitlines())!=3:raise RuntimeError('Audio services not active')
  serial.command('runuser -u qa -- env XDG_RUNTIME_DIR=/run/user/1000 pw-play /usr/share/sounds/ocean/stereo/desktop-login.oga && echo AUDIO_PLAYED')
  text('kcmshell6 kcm_soundtheme\n');time.sleep(5);screenshot('10-sound-themes')
  words=subprocess.check_output(['tesseract',str(run/'10-sound-themes.png'),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
  if not any(t in words for t in ['ocean','océano','oceano']) or not any(t in words for t in ['oxygen','oxígeno','oxigeno']):raise RuntimeError('Sound themes missing in Settings')
  serial.command('systemctl --no-block reboot');serial.close();serial=None;bootwait(70);screenshot('11-second-boot')
- (run/'result.json').write_text(json.dumps({'installed':'passed','live_idle_after_330_seconds':'passed','privileged_launchers_hidden_both_modes':'passed','media_removal_prompt':'passed','installed_audit':'passed','sound_services':'passed','sound_themes_in_settings':'passed','second_boot_without_iso':'captured'},indent=2)+'\n')
+ (run/'result.json').write_text(json.dumps({'installed':'passed','live_idle_seconds':idle_seconds,'live_idle_test':'passed','privileged_launchers_hidden_both_modes':'passed','media_removal_prompt':'passed','installed_audit':'passed','sound_services':'passed','sound_themes_in_settings':'passed','second_boot_without_iso':'captured'},indent=2)+'\n')
  print('BYPSSD_INSTALLED_X64_QA_OK',flush=True)
 except Exception:
  try:screenshot('failure')

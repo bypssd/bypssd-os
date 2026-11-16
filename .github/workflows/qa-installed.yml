@@ -4,6 +4,10 @@ on:
     inputs:
       source_run:
         required: true
+      idle_seconds:
+        description: 'Segundos de inactividad Live (330 para la comprobación completa)'
+        default: '330'
+        required: false
 permissions:
   actions: read
   contents: read
@@ -26,6 +30,8 @@ jobs:
           name: opensuse-delivery-x86_64
           path: incoming
       - name: Instalar, reiniciar y comprobar sistema y sonidos
+        env:
+          BYPSSD_QA_IDLE_SECONDS: ${{ inputs.idle_seconds }}
         run: |
           set -o pipefail
           mkdir -p out
