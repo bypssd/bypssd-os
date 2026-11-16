@@ -19,7 +19,8 @@ def qmp(cmd,arguments=None):
  if 'error' in data:raise RuntimeError(data)
  return data['return']
 def key(k):subprocess.run([sys.executable,'scripts/qmp-type.py','--key',k],check=True)
-def text(t,encoded=False):subprocess.run([sys.executable,'scripts/qmp-type.py']+(['--encoded'] if encoded else [])+[t],check=True)
+keyboard_layout='es'
+def text(t,encoded=False):subprocess.run([sys.executable,'scripts/qmp-type.py','--layout',keyboard_layout]+(['--encoded'] if encoded else [])+[t],check=True)
 def click(x,y,double=False):subprocess.run([sys.executable,'scripts/qmp-click.py',str(x),str(y),'--width','1000','--height','625']+(['--double'] if double else []),check=True)
 def screenshot(name):
  p=run/(name+'.ppm');qmp('screendump',{'filename':str(p)})
@@ -82,7 +83,10 @@ try:
  screenshot('03-partition');click(161,77);click(887,575);time.sleep(1)
  for x,y,value in [(233,60,'BYPSSD QA'),(233,108,'qa'),(233,155,'bypssd-qa'),(233,202,'BypssdQA42'),(390,202,'BypssdQA42')]:
   click(x,y);key('ctrl-a');text(value);time.sleep(.5)
- screenshot('04-users');click(887,575);time.sleep(1);screenshot('05-summary');click(887,575)
+ screenshot('04-users');click(887,575);time.sleep(1);screenshot('05-summary')
+ summary_words=subprocess.check_output(['tesseract',str(run/'05-summary.png'),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
+ installed_layout='us' if 'english (us)' in summary_words or 'english(us)' in summary_words else 'es'
+ print('INSTALLED_KEYBOARD_LAYOUT',installed_layout,flush=True);click(887,575)
  deadline=time.time()+600
  while time.time()<deadline:
   out=serial.command("grep 'completion: succeeded' /root/.cache/calamares/session.log || true")
@@ -98,7 +102,7 @@ try:
   words=subprocess.check_output(['tesseract',str(run/'07-remove-media.png'),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
   if 'installation media' in words and 'enter' in words:prompt=True;break
  if not prompt:raise RuntimeError('Media-removal prompt was not displayed')
- qmp('eject',{'device':'livecd','force':False});key('ret');bootwait(60);screenshot('08-installed-login');text('BypssdQA42');key('ret');bootwait(30);screenshot('09-installed-desktop')
+ qmp('eject',{'device':'livecd','force':False});key('ret');keyboard_layout=installed_layout;bootwait(60);screenshot('08-installed-login');text('BypssdQA42');key('ret');bootwait(30);screenshot('09-installed-desktop')
  click(26,605);text('super');time.sleep(1);screenshot('09b-installed-no-superuser-entries');key('esc')
  key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(3);text('BypssdQA42');key('ret');time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; cat /proc/cmdline')
