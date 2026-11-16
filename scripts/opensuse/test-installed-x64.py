@@ -52,6 +52,7 @@ serial=None
 try:
  bootwait(100);screenshot('01-live');key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; lsblk -o NAME,SIZE,TYPE')
+ if 'LIVE_SHUTDOWN_IMAGE_OK' not in serial.command('test -s /boot/initrd && echo LIVE_SHUTDOWN_IMAGE_OK'):raise RuntimeError('Live shutdown initramfs missing')
  click(52,45,True);time.sleep(5);key('meta_l-pgup');time.sleep(2);screenshot('02-welcome')
  for _ in range(3):click(887,575);time.sleep(1)
  screenshot('03-partition');click(161,77);click(887,575);time.sleep(1)
@@ -80,10 +81,10 @@ try:
  if '"installed_checks": "passed"' not in result:raise RuntimeError('Installed audit failed')
  audio=serial.command('runuser -u qa -- env XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active pipewire wireplumber pipewire-pulse')
  if sum(line.strip()=='active' for line in audio.splitlines())!=3:raise RuntimeError('Audio services not active')
- serial.command('runuser -u qa -- env XDG_RUNTIME_DIR=/run/user/1000 pw-play /usr/share/sounds/ocean/stereo/desktop-login.oga; echo AUDIO_PLAYED')
+ serial.command('runuser -u qa -- env XDG_RUNTIME_DIR=/run/user/1000 pw-play /usr/share/sounds/ocean/stereo/desktop-login.oga && echo AUDIO_PLAYED')
  text('kcmshell6 kcm_soundtheme\n');time.sleep(5);screenshot('10-sound-themes')
  words=subprocess.check_output(['tesseract',str(run/'10-sound-themes.png'),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
- if 'ocean' not in words or 'oxygen' not in words:raise RuntimeError('Sound themes missing in Settings')
+ if not any(t in words for t in ['ocean','océano','oceano']) or not any(t in words for t in ['oxygen','oxígeno','oxigeno']):raise RuntimeError('Sound themes missing in Settings')
  serial.command('systemctl --no-block reboot');serial.close();serial=None;bootwait(70);screenshot('11-second-boot')
  (run/'result.json').write_text(json.dumps({'installed':'passed','media_removal_prompt':'passed','installed_audit':'passed','sound_services':'passed','sound_themes_in_settings':'passed','second_boot_without_iso':'captured'},indent=2)+'\n')
  print('BYPSSD_INSTALLED_X64_QA_OK',flush=True)
@@ -96,3 +97,15 @@ finally:
  try:qmp('quit')
  except Exception:vm.terminate()
  vm.wait(timeout=30);server.shutdown()
+
+# QEMU closes the WAV header on exit. Verify actual non-silent PCM samples.
+import wave,array
+nonzero=False
+with wave.open(str(run/'audio.wav'),'rb') as wav:
+ if wav.getsampwidth()!=2:raise RuntimeError('Unexpected audio sample width')
+ while True:
+  samples=wav.readframes(65536)
+  if not samples:break
+  if max(map(abs,array.array('h',samples)),default=0)>64:nonzero=True;break
+if not nonzero:raise RuntimeError('The virtual audio output was silent')
+print('BYPSSD_AUDIO_PCM_OK',flush=True)

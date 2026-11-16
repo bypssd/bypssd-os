@@ -20,6 +20,7 @@ for base in [Path('/home'),Path('/etc/skel')]:
  check(not list(base.rglob('bypssd-install.desktop')),'Installer shortcut remains under '+str(base))
 for theme in ['ocean','oxygen']:
  check(Path('/usr/share/sounds',theme,'index.theme').is_file(),'Missing sound theme '+theme)
+check(Path('/boot/initrd').is_file(),'Missing installed initramfs')
 check(Path('/boot/grub2/grub.cfg').is_file(),'Missing GRUB configuration')
 for path in ['EFI/BYPSSD/grub.cfg','EFI/BOOT/grub.cfg']:
  check(Path('/boot/efi',path).is_file(),'Missing '+path)

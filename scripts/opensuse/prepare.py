@@ -124,6 +124,10 @@ WantedBy=graphical.target
 ''')
 write(root/'usr/libexec/bypssd-live-setup','''#!/bin/bash
 set -eu
+# KIWI keeps the Live initramfs on the medium; restore it during shutdown.
+live_initrd=/run/overlay/live/boot/$(uname -m)/loader/initrd
+[ -s "$live_initrd" ] || { echo 'No se encuentra el initramfs Live' >&2; exit 1; }
+ln -sfn "$live_initrd" "/boot/initrd-$(uname -r)"
 id linux >/dev/null 2>&1 || useradd -m -c 'Sesión Live BYPSSD' -G users,video,audio linux
 passwd -d linux
 session=$(basename "$(find /usr/share/wayland-sessions -name '*plasma*.desktop' | head -1)")
