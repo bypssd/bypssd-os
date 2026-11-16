@@ -10,9 +10,11 @@ if set(repos)!={'opensuse-oss','bypssd-updates'}:errors.append('Unexpected activ
 for n,r in repos.items():
  if 'fedora' in str(r).lower():errors.append('Fedora repository remains')
 if not (root/'etc/os-release').is_file() or 'ID=bypssd' not in (root/'etc/os-release').read_text():errors.append('Missing BYPSSD identity')
-required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding','pkexec','xf86-input-libinput','ocean-sound-theme6','oxygen6-sounds','plasma6-pa','pipewire-pulseaudio']
+required=['discover6','discover6-backend-packagekit','PackageKit-backend-zypp','AppStream','calamares','bypssd-branding','pkexec','xf86-input-libinput','ocean-sound-theme6','oxygen6-sounds','plasma6-pa','pipewire-pulseaudio','qt6-translations','kf6-kcmutils-lang','libKF6KCMUtils6-lang','libKF6ConfigWidgets6-lang','libKF6WidgetsAddons6-lang','libKF6XmlGui6-lang']
 for n in required:
  if subprocess.run(['rpm','--root',str(root),'-q',n],stdout=subprocess.DEVNULL).returncode:errors.append('Missing '+n)
+grub=(root/'etc/calamares/modules/grubcfg.conf').read_text()
+if 'overwrite: true' not in grub or '/usr/share/grub2/themes/bypssd/theme.txt' not in grub:errors.append('Installed GRUB would retain Live parameters or broken theme')
 boot=(root/'etc/calamares/modules/bootloader.conf').read_text()
 for key in ['grubInstall:', 'grubMkconfig:', 'grubCfg:', 'grubProbe:', 'efiBootMgr:']:
  if key not in boot:errors.append('Missing installer bootloader key '+key)

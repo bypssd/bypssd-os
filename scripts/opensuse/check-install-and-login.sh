@@ -4,6 +4,10 @@ set -euxo pipefail
 zypper -n install --no-recommends grub2 dosfstools e2fsprogs sddm-qt6 xorg-x11-server-Xvfb ImageMagick qt6-declarative-imports dejavu-fonts ocean-sound-theme6 oxygen6-sounds
 find /usr/share/sounds -name index.theme -print
 qa=$(mktemp -d /var/tmp/bypssd-check.XXXXXX)
+mkdir -p "$qa/repos"
+cp opensuse/bypssd-updates.repo "$qa/repos/"
+zypper --reposd-dir "$qa/repos" --cache-dir "$qa/cache" -n refresh
+
 truncate -s 128M "$qa/boot.img"
 truncate -s 64M "$qa/efi.img"
 mkfs.ext4 -F "$qa/boot.img"

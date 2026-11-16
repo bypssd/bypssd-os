@@ -140,3 +140,11 @@ ocean-sound-theme6
 oxygen6-sounds
 plasma6-pa
 pipewire-pulseaudio
+
+# Shared KDE/Qt dialogs and notification translations.
+qt6-translations
+kf6-kcmutils-lang
+libKF6KCMUtils6-lang
+libKF6ConfigWidgets6-lang
+libKF6WidgetsAddons6-lang
+libKF6XmlGui6-lang
