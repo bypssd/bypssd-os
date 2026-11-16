@@ -26,6 +26,10 @@ def screenshot(name):
  p=run/(name+'.ppm');qmp('screendump',{'filename':str(p)})
  from PIL import Image
  Image.open(p).save(run/(name+'.png'));p.unlink()
+def check_admin_menu(name):
+ screenshot(name)
+ words=subprocess.check_output(['tesseract',str(run/(name+'.png')),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
+ if 'super user mode' in words or 'superusuario' in words:raise RuntimeError('Privileged launcher is visible in the actual application menu')
 def bootwait(seconds):
  for _ in range(seconds//10):
   if vm.poll() is not None:raise RuntimeError('QEMU exited')
@@ -54,7 +58,7 @@ idle_seconds=int(os.environ.get('BYPSSD_QA_IDLE_SECONDS') or '330');assert 0<=id
 try:
  bootwait(100);screenshot('01-live');key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; lsblk -o NAME,SIZE,TYPE')
- click(26,605);text('super');time.sleep(1);screenshot('01b-live-no-superuser-entries');key('esc')
+ click(26,605);text('super');time.sleep(1);check_admin_menu('01b-live-no-superuser-entries');key('esc')
  if 'LIVE_SHUTDOWN_IMAGE_OK' not in serial.command('test -s /boot/initrd && echo LIVE_SHUTDOWN_IMAGE_OK'):raise RuntimeError('Live shutdown initramfs missing')
  if os.environ.get('BYPSSD_QA_REBOOT_ONLY')=='1':
   setup=serial.command('/usr/lib/dracut/dracut-initramfs-restore; /usr/lib/dracut/dracut-install -D /run/initramfs -a /usr/bin/chvt /usr/bin/stty /usr/bin/timeout; curl -fsS http://10.0.2.2:8765/remove-media.sh -o /run/initramfs/var/lib/dracut/hooks/shutdown/99-remove-media.sh; sed -i "2i exec 2>/dev/ttyS0; set -x" /run/initramfs/var/lib/dracut/hooks/shutdown/99-remove-media.sh; test -x /run/initramfs/usr/bin/chvt && echo CONSOLE_SETUP_OK')
@@ -103,7 +107,7 @@ try:
   if 'installation media' in words and 'enter' in words:prompt=True;break
  if not prompt:raise RuntimeError('Media-removal prompt was not displayed')
  qmp('eject',{'device':'livecd','force':False});key('ret');keyboard_layout=installed_layout;bootwait(60);screenshot('08-installed-login');text('BypssdQA42');key('ret');bootwait(30);screenshot('09-installed-desktop')
- click(26,605);text('super');time.sleep(1);screenshot('09b-installed-no-superuser-entries');key('esc')
+ click(26,605);text('super');time.sleep(1);check_admin_menu('09b-installed-no-superuser-entries');key('esc')
  key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(3);text('BypssdQA42');key('ret');time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; cat /proc/cmdline')
  result=serial.command('curl -fsS http://10.0.2.2:8765/check.py -o /tmp/bypssd-check.py; python3 /tmp/bypssd-check.py')

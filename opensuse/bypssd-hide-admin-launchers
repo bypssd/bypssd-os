@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Hide privileged file-manager/terminal launchers through supported XDG overrides."""
 from pathlib import Path
-import configparser,json,re
+import configparser,json,re,io
 hidden=[]
 for directory in ['/usr/share/applications','/usr/local/share/applications']:
  for path in sorted(Path(directory).rglob('*.desktop')):
@@ -16,9 +16,14 @@ for directory in ['/usr/share/applications','/usr/local/share/applications']:
   identity=(command+' '+names+' '+path.name).lower()
   kind='file-manager' if re.search(r'dolphin|file.?manager|file.?explorer|gestor de archivos',identity) else ('terminal' if re.search(r'konsole|xterm|terminal',identity) else None)
   privileged=(d.get('X-KDE-SubstituteUID','').lower()=='true' or d.get('X-KDE-Username','').lower()=='root' or re.search(r'\b(kdesu|xdg-su|pkexec|sudo|rootshell)\b|super.?user|superusuario|root[-_. ]?(shell|terminal|konsole)',identity))
+  if 'calamares' in command.lower() and desktop_id!='bypssd-install.desktop':kind='upstream-installer';privileged=True
   if not kind or not privileged:continue
   target=Path('/usr/local/share/applications')/desktop_id;target.parent.mkdir(parents=True,exist_ok=True)
-  target.write_text('[Desktop Entry]\nType=Application\nName=Acceso administrativo\nHidden=true\n')
+  d.pop('Hidden',None);d['NoDisplay']='true'
+  output=io.StringIO();c.write(output,space_around_delimiters=False);contents=output.getvalue()
+  target.write_text(contents)
+  # KDE must see a complete desktop entry in its per-user data directory.
+  seed=Path('/etc/skel/.local/share/applications')/desktop_id;seed.parent.mkdir(parents=True,exist_ok=True);seed.write_text(contents)
   hidden.append({'desktop':desktop_id,'kind':kind,'source':str(path)})
 report=Path('/var/lib/bypssd/hidden-admin-launchers.json');report.parent.mkdir(parents=True,exist_ok=True)
 report.write_text(json.dumps(hidden,indent=2)+'\n')

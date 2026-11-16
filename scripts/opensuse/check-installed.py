@@ -15,7 +15,7 @@ for p in Path('/usr/share/applications').glob('*.desktop'):
  except (OSError,UnicodeError):continue
  if re.search(r'^(Exec|TryExec)=.*(calamares|bypssd-install)',text,re.M):
   override=Path('/usr/local/share/applications')/p.name
-  check(override.is_file() and 'Hidden=true' in override.read_text(),'Installer visible: '+p.name)
+  check(override.is_file() and 'NoDisplay=true' in override.read_text(),'Installer visible: '+p.name)
 for base in [Path('/home'),Path('/etc/skel')]:
  check(not list(base.rglob('bypssd-install.desktop')),'Installer shortcut remains under '+str(base))
 for theme in ['ocean','oxygen']:
@@ -23,8 +23,11 @@ for theme in ['ocean','oxygen']:
 admin=json.loads(Path('/var/lib/bypssd/hidden-admin-launchers.json').read_text())
 for item in admin:
  override=Path('/usr/local/share/applications')/item['desktop']
- check(override.is_file() and 'Hidden=true' in override.read_text(),'Privileged launcher remains: '+item['desktop'])
+ check(override.is_file() and 'NoDisplay=true' in override.read_text(),'Privileged launcher remains: '+item['desktop'])
 for home in Path('/home').iterdir():
+ for item in admin:
+  entry=home/'.local/share/applications'/item['desktop']
+  check(entry.is_file() and 'NoDisplay=true' in entry.read_text(),'Missing installed user menu override '+item['desktop'])
  cfg=configparser.RawConfigParser();cfg.read(home/'.config/kscreenlockerrc')
  for key in ['Autolock','LockOnResume','RequirePassword']:
   check(cfg.get('Daemon',key,fallback='true').lower()!='false','Live lock settings leaked into installed account '+home.name)

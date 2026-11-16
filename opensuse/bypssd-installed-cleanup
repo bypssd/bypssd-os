@@ -15,7 +15,11 @@ done
 rm -f /usr/share/applications/bypssd-install.desktop
 for home in /etc/skel /root /home/*; do
  [ -d "$home" ] || continue
- find "$home" -maxdepth 4 -type f \( -name 'bypssd-install.desktop' -o -name '*calamares*.desktop' \) -delete
+ while IFS= read -r -d '' shortcut; do
+  # Preserve the complete NoDisplay entries which mask the upstream installer.
+  grep -q '^NoDisplay=true$' "$shortcut" && continue
+  rm -f "$shortcut"
+ done < <(find "$home" -maxdepth 4 -type f \( -name 'bypssd-install.desktop' -o -name '*calamares*.desktop' \) -print0)
  # Cached KService entries can otherwise retain the removed Live launcher.
  find "$home/.cache" -maxdepth 1 -name 'ksycoca6_*' -type f -delete 2>/dev/null || true
 done
