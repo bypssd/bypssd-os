@@ -52,6 +52,7 @@ serial=None
 try:
  bootwait(100);screenshot('01-live');key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; lsblk -o NAME,SIZE,TYPE')
+ click(26,605);text('super');time.sleep(1);screenshot('01b-live-no-superuser-entries');key('esc')
  if 'LIVE_SHUTDOWN_IMAGE_OK' not in serial.command('test -s /boot/initrd && echo LIVE_SHUTDOWN_IMAGE_OK'):raise RuntimeError('Live shutdown initramfs missing')
  click(52,45,True);time.sleep(5);key('meta_l-pgup');time.sleep(2);screenshot('02-welcome')
  live=serial.command('cat /home/linux/.config/kscreenlockerrc; cat /var/lib/bypssd/hidden-admin-launchers.json; systemd-inhibit --list --no-pager')
@@ -83,6 +84,7 @@ try:
   if 'installation media' in words and 'enter' in words:prompt=True;break
  if not prompt:raise RuntimeError('Media-removal prompt was not displayed')
  qmp('eject',{'device':'livecd','force':False});key('ret');bootwait(60);screenshot('08-installed-login');text('BypssdQA42');key('ret');bootwait(30);screenshot('09-installed-desktop')
+ click(26,605);text('super');time.sleep(1);screenshot('09b-installed-no-superuser-entries');key('esc')
  key('ctrl-alt-t');time.sleep(4);text(bootstrap,True);time.sleep(3);text('BypssdQA42');key('ret');time.sleep(4)
  serial=Serial();serial.read(2);serial.command('stty -echo; id; cat /proc/cmdline')
  result=serial.command('curl -fsS http://10.0.2.2:8765/check.py -o /tmp/bypssd-check.py; python3 /tmp/bypssd-check.py')
@@ -94,7 +96,7 @@ try:
  words=subprocess.check_output(['tesseract',str(run/'10-sound-themes.png'),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
  if not any(t in words for t in ['ocean','océano','oceano']) or not any(t in words for t in ['oxygen','oxígeno','oxigeno']):raise RuntimeError('Sound themes missing in Settings')
  serial.command('systemctl --no-block reboot');serial.close();serial=None;bootwait(70);screenshot('11-second-boot')
- (run/'result.json').write_text(json.dumps({'installed':'passed','media_removal_prompt':'passed','installed_audit':'passed','sound_services':'passed','sound_themes_in_settings':'passed','second_boot_without_iso':'captured'},indent=2)+'\n')
+ (run/'result.json').write_text(json.dumps({'installed':'passed','live_idle_after_330_seconds':'passed','privileged_launchers_hidden_both_modes':'passed','media_removal_prompt':'passed','installed_audit':'passed','sound_services':'passed','sound_themes_in_settings':'passed','second_boot_without_iso':'captured'},indent=2)+'\n')
  print('BYPSSD_INSTALLED_X64_QA_OK',flush=True)
 except Exception:
  try:screenshot('failure')
