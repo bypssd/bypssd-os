@@ -5,7 +5,7 @@ import subprocess,os,json,time,socket,threading,http.server,functools,shutil,sys
 r=Path.cwd();run=r/'out/installed-x64';run.mkdir(parents=True,exist_ok=True)
 iso=next((r/'incoming').rglob('BYPSSD-OS-Renacer-1.1-x86_64.iso'))
 share=run/'http';share.mkdir(exist_ok=True)
-shutil.copy('scripts/opensuse/qa-bootstrap.sh',share/'qa.sh');shutil.copy('scripts/opensuse/check-installed.py',share/'check.py')
+shutil.copy('opensuse/dracut/91bypssd-live/remove-media.sh',share/'remove-media.sh');shutil.copy('scripts/opensuse/qa-bootstrap.sh',share/'qa.sh');shutil.copy('scripts/opensuse/check-installed.py',share/'check.py')
 server=http.server.ThreadingHTTPServer(('127.0.0.1',8765),functools.partial(http.server.SimpleHTTPRequestHandler,directory=str(share)))
 threading.Thread(target=server.serve_forever,daemon=True).start()
 shutil.copy('/usr/share/OVMF/OVMF_VARS_4M.fd',run/'vars.fd')
@@ -54,6 +54,18 @@ try:
  serial=Serial();serial.read(2);serial.command('stty -echo; id; lsblk -o NAME,SIZE,TYPE')
  click(26,605);text('super');time.sleep(1);screenshot('01b-live-no-superuser-entries');key('esc')
  if 'LIVE_SHUTDOWN_IMAGE_OK' not in serial.command('test -s /boot/initrd && echo LIVE_SHUTDOWN_IMAGE_OK'):raise RuntimeError('Live shutdown initramfs missing')
+ if os.environ.get('BYPSSD_QA_REBOOT_ONLY')=='1':
+  setup=serial.command('/usr/lib/dracut/dracut-initramfs-restore; /usr/lib/dracut/dracut-install -D /run/initramfs -a /usr/bin/chvt /usr/bin/stty /usr/bin/timeout; curl -fsS http://10.0.2.2:8765/remove-media.sh -o /run/initramfs/var/lib/dracut/hooks/shutdown/99-remove-media.sh; sed -i "2i exec 2>/dev/ttyS0; set -x" /run/initramfs/var/lib/dracut/hooks/shutdown/99-remove-media.sh; test -x /run/initramfs/usr/bin/chvt && echo CONSOLE_SETUP_OK')
+  if 'CONSOLE_SETUP_OK' not in setup:raise RuntimeError('Console tool installation failed')
+  serial.command('systemctl --no-block reboot');seen=False
+  for _ in range(30):
+   time.sleep(3);serial.read(1);screenshot('reboot-only-prompt')
+   words=subprocess.check_output(['tesseract',str(run/'reboot-only-prompt.png'),'stdout'],stderr=subprocess.DEVNULL,text=True).lower()
+   if 'installation media' in words and 'enter' in words:seen=True;break
+  if not seen:raise RuntimeError('Reboot-only console prompt not visible')
+  (run/'reboot-only-result.json').write_text(json.dumps({'scope':'Live reboot prompt only','prompt_visible':True},indent=2)+'\n')
+  print('BYPSSD_REBOOT_CONSOLE_QA_OK',flush=True);sys.exit(0)
+
  click(52,45,True);time.sleep(5);key('meta_l-pgup');time.sleep(2);screenshot('02-welcome')
  live=serial.command('cat /home/linux/.config/kscreenlockerrc; cat /var/lib/bypssd/hidden-admin-launchers.json; systemd-inhibit --list --no-pager')
  if 'Autolock=false' not in live or 'LockOnResume=false' not in live or 'RequirePassword=false' not in live:raise RuntimeError('Live lock protection missing')
