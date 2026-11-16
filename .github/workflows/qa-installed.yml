@@ -1,0 +1,42 @@
+name: Verificar instalación completa BYPSSD x64
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        required: true
+permissions:
+  actions: read
+  contents: read
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar entorno de prueba desechable
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 ovmf python3-pil tesseract-ocr
+          if [ -c /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.source_run }}
+          name: opensuse-delivery-x86_64
+          path: incoming
+      - name: Instalar, reiniciar y comprobar sistema y sonidos
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python3 -u scripts/opensuse/test-installed-x64.py 2>&1 | tee out/installed-x64-console.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: installed-x64-qa
+          path: |
+            out/installed-x64/*.png
+            out/installed-x64/*.log
+            out/installed-x64/*.json
+            out/installed-x64-console.log
+          retention-days: 30
