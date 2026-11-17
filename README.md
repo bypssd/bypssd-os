@@ -1,5 +1,13 @@
 # BYPSSD OS Renacer 1.1
 
+Entrega local verificada el 17 de noviembre de 2026 (r16):
+`iso_final/BYPSSD-OS_Renacer_arm64.iso` y
+`iso_final/BYPSSD-OS_Renacer_x86_64.iso`, con sus archivos `.sha256`.
+Los detalles de integridad y pruebas están en `iso_final/verification.json`.
+Las ISO se generaron el 16 de noviembre y se comprobaron instaladas el 17;
+no se publican como Releases de GitHub. Están listas para subir a SourceForge.
+
+
 Sistema independiente para oficina y educación de BYPSSD Informática Retro,
 Valencia. KDE Plasma, español de España, amarillo #FFB800, negro y blanco.
 
@@ -17,7 +25,7 @@ en las nuevas recetas. No se ha tocado Parallels ni el disco del Mac para instal
 - [Compilación openSUSE ARM64/x64](https://github.com/bypssd/bypssd-os/actions/workflows/build-opensuse.yml).
 - [Paquetes BYPSSD y fuentes](https://github.com/bypssd/bypssd-os/releases): GitHub aloja los RPM propios y sus SRPM, no las ISO públicas.
 - Canal propio [BYPSSD Updates](https://bypssd.github.io/bypssd-os/), inicialmente vacío, con índices RPM válidos para ambas arquitecturas.
-- Revisión actual: r10, con corrección EFI x64, selector de cuentas y limpieza del menú instalado.
+- Revisión actual: r16, con reinicio corregido, menús comprobados visualmente, sonidos y sesión Live sin bloqueo.
 
 ## ISO completas y SourceForge
 
@@ -189,3 +197,115 @@ KDE confirmado en ARM64 (QEMU/HVF local, sin disco) y x64 (Actions 43756813345).
 Capturas locales: `out/qemu-r10-live-only/final.png` y
 `out/r10-x64-boot/desktop-preview.png`. Los registros de las pruebas nativas
 EFI y de SDDM están en `out/logs/r10-native/`, con auditorías sin errores.
+
+## Revisión r11: reinicio, menú instalado y sonidos
+
+- Calamares ofrece reiniciar al terminar y usa `systemctl --no-block -i reboot`.
+- El initramfs Live incorpora un hook de apagado propio. Tras liberar el sistema
+  Live, expulsa el CD cuando existe, muestra «Please remove the installation media,
+  and then press enter» y espera Enter antes de reiniciar. El hook solo actúa con
+  `rd.live.image` y durante un reinicio; no se activa al reiniciar un sistema instalado.
+- El lanzador propio se guarda como plantilla y solo se crea en la capa temporal
+  Live. No se incluye en el árbol de aplicaciones que copia Calamares.
+- La limpieza del destino oculta lanzadores genéricos mediante XDG, retira accesos
+  personales y cachés de menú y elimina los permisos y autologin de Live.
+- Se incluyen `ocean-sound-theme6`, `oxygen6-sounds`, `plasma6-pa` y
+  `pipewire-pulseaudio`. Ocean queda seleccionado con sonidos habilitados.
+- `scripts/opensuse/check-installed.py` comprueba el sistema arrancado desde su
+  disco. El flujo `qa-installed.yml` instala en un disco QEMU desechable y comprueba
+  el aviso de retirada del medio, el inicio desde disco y los sonidos en Ajustes.
+- Las pruebas no utilizan Parallels. Las cuentas y accesos de diagnóstico solo
+  existen en las máquinas de prueba y no forman parte de las ISO.
+
+### Corrección adicional r12 del reinicio Live
+
+La prueba instalada de x64 detectó que r11 no mostraba el aviso: el sistema Live
+conservaba `/boot/initrd` apuntando a un fichero ausente. Aunque el hook estaba
+en el initramfs del medio, dracut no podía recuperarlo al apagar.
+La preparación de Live enlaza ahora `/boot/initrd-$(uname -r)` con el initramfs
+real del CD/USB, en `/run/overlay/live/boot/$(uname -m)/loader/initrd`. El enlace
+se crea exclusivamente en la capa temporal Live, y no se copia al destino.
+En la comprobación ARM64 el aviso se mantuvo visible hasta pulsar Enter y el
+equipo arrancó desde el disco instalado después de retirar el CD virtual.
+
+## Revisión r14: bloqueo Live y accesos de superusuario
+
+Solo la cuenta temporal `linux` recibe `Autolock=false`, `LockOnResume=false`,
+`LockOnStart=false` y `RequirePassword=false` en su `kscreenlockerrc`. Estos
+ajustes no se guardan en `/etc/skel` ni en la configuración global y no se
+copian a las cuentas del sistema instalado. Calamares se ejecuta bajo una
+inhibición de `idle:sleep`, que se libera al cerrar el instalador.
+
+Los lanzadores de gestor de archivos y terminal como superusuario se ocultan
+mediante entradas XDG `Hidden=true` en `/usr/local/share/applications`, tanto
+en Live como en el destino. Se conservan los lanzadores normales y los archivos
+oficiales de los paquetes. El informe queda en
+`/var/lib/bypssd/hidden-admin-launchers.json`. La prueba instalada comprueba
+además que los ajustes sin bloqueo de Live no se heredan.
+
+La prueba x64 deja Calamares abierto sin actividad durante 330 segundos,
+más que el bloqueo predeterminado de cinco minutos, y consulta por D-Bus
+que la sesión permanezca desbloqueada antes de continuar la instalación.
+
+## Revisión final r15: coherencia del sistema instalado y consola de reinicio
+
+Calamares genera `/etc/default/grub` con `overwrite: true` y parámetros
+derivados del destino. Así no hereda `rd.live.image` ni otros argumentos de
+la sesión temporal. Se fija la ruta existente del tema en
+`/usr/share/grub2/themes/bypssd/theme.txt` y se usa la terminal gráfica de GRUB.
+
+Los diálogos comunes incluyen `qt6-translations`, `kf6-kcmutils-lang` y las
+traducciones de `libKF6KCMUtils6`, `libKF6ConfigWidgets6`, `libKF6WidgetsAddons6`
+y `libKF6XmlGui6`. Se comprobó la interfaz de sonidos con «Océano» y «Oxígeno»
+y botones en español, reproducción con salida PCM real e instalación de VLC
+desde Discover con la contraseña del administrador normal.
+
+La URL antigua de BYPSSD Updates quedó inutilizable por la redirección de Pages
+y la desaparición de sus metadatos. El repositorio vacío se sirve ahora desde
+`https://raw.githubusercontent.com/bypssd/bypssd-os/main/repo/tumbleweed/$basearch/updates/`.
+Se mantienen las comprobaciones de firmas de paquetes. Su refresco se comprueba
+en las dos compilaciones nativas, sin cambiar la web o el dominio personalizado.
+
+En x64, la consola gráfica podía quedar negra al apagar. El hook usa ahora
+`chvt 1`, normaliza el terminal y escribe/lee en `/dev/tty1` (o en la consola
+si no existe). Las órdenes de expulsión del CD y salida de Plymouth tienen
+un tiempo máximo. La prueba específica 43935354088 confirmó el aviso visible
+y la espera de Enter; es un diagnóstico de reinicio Live, no una prueba completa
+de instalación. La validación completa se registra aparte.
+
+## Revisión r16: ocultación efectiva de los accesos del menú
+
+La revisión visual detectó que los pequeños archivos globales `Hidden=true`
+no bastaban: los accesos SU todavía aparecían en Live aunque la auditoría de
+archivos los consideraba ocultos. Se sustituyen por copias completas de las
+entradas, con `NoDisplay=true`, tanto globalmente como en
+`/etc/skel/.local/share/applications/`. Así cada cuenta Live o instalada recibe
+las entradas válidas que KDE lee con prioridad. Los archivos oficiales no se editan.
+
+Se ocultan `konsolesu.desktop`, `org.kde.dolphinsu.desktop` y la entrada genérica
+`calamares.desktop`. El lanzador propio BYPSSD se crea solo en Live y se retira
+del destino. La limpieza conserva las entradas NoDisplay, y las pruebas revisan
+el menú real mediante capturas y OCR antes y después de instalar.
+
+Compilación r16: ejecución 43948175754, fuente afdbd44. Prueba completa x64
+43950440698: correcta, con 330 segundos de inactividad sin bloqueo, aviso de
+retirada del medio, arranque instalado, auditoría sin errores, temas Ocean/Oxygen
+y salida de audio PCM comprobada. Los ajustes sin contraseña de Live no se
+heredan en el sistema instalado. La validación local ARM64 y sus capturas se
+conservan en `out/qemu-r16-installed/` y `out/logs/`.
+
+### Verificación final r16 — 17 de noviembre de 2026
+
+- ARM64: instalación completa en disco QEMU/HVF exclusivo del proyecto, aviso
+  visible al reiniciar, retirada del CD, acceso al escritorio instalado y
+  auditoría sin errores. Servicios de audio activos y salida PCM con pico 23233.
+- x64: ejecución 43950440698 correcta, con 330 segundos reales sin bloqueo en
+  Live, comprobación visual del menú antes y después de instalar, aviso de
+  retirada del medio, inicio desde disco, temas de sonidos y audio PCM correcto.
+- El sistema instalado conserva el bloqueo normal y no hereda el autologin ni
+  las autorizaciones especiales de Live. Las cuentas de QA no están en las ISO.
+- Los originales anteriores de `iso_final/` se conservaron en
+  `out/archive/before-r16-20261117/`. Se retiraron las copias temporales de
+  entrega de Actions; se conservan logs y paquetes BYPSSD. Parallels no se utilizó.
+- Pruebas realizadas en QEMU; la validación de hardware físico y Secure Boot
+  continúa pendiente.
