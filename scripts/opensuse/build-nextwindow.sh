@@ -3,9 +3,14 @@ set -euo pipefail
 zypper -n refresh
 zypper -n install --no-recommends rpm-build gcc make curl glibc-32bit libudev1-32bit gzip tar findutils binutils systemd
 if [[ ${NEXTWINDOW_TARGET:-latest} == live-r16 || ${NEXTWINDOW_TARGET:-latest} == updates ]]; then
-    zypper -n install --no-recommends \
-      https://download.opensuse.org/tumbleweed/repo/oss/noarch/kernel-devel-7.3.3-1.1.noarch.rpm \
-      https://download.opensuse.org/tumbleweed/repo/oss/x86_64/kernel-default-devel-7.3.3-1.1.x86_64.rpm
+    mkdir -p /tmp/bypssd-headers
+    for package in noarch/kernel-devel-7.3.3-1.1.noarch.rpm x86_64/kernel-default-devel-7.3.3-1.1.x86_64.rpm; do
+        destination=/tmp/bypssd-headers/${package##*/}
+        curl -fL --retry 2 "https://download.opensuse.org/tumbleweed/repo/oss/$package" -o "$destination" ||
+            curl -fL --retry 2 "https://mirror.makelink.ee/tumbleweed/repo/oss/$package" -o "$destination"
+    done
+    # zypper verifies the upstream package signatures normally.
+    zypper -n install --no-recommends /tmp/bypssd-headers/*.rpm
 fi
 if [[ ${NEXTWINDOW_TARGET:-latest} != live-r16 ]]; then
     zypper -n install --no-recommends kernel-default-devel kernel-devel
