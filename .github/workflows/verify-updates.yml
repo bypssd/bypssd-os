@@ -1,0 +1,31 @@
+name: Verificar actualización instalada BYPSSD
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        required: true
+        default: '44268824252'
+permissions:
+  actions: read
+  contents: read
+jobs:
+  resolve-x64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.source_run }}
+          name: bypssd-nextwindow-x86_64
+          path: out/update-qa
+      - name: Instalar branding y comprobar incorporación automática del soporte x64
+        run: |
+          set -o pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace opensuse/tumbleweed bash scripts/updates/test-x64.sh 2>&1 | tee out/update-qa/x64-resolver-test.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: update-r17-x64-validation
+          path: out/update-qa/x64-resolver-test.log
