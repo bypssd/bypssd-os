@@ -330,19 +330,26 @@ conservan en `out/qemu-r16-installed/` y `out/logs/`.
   instalado permite probarlo sin reinstalar ni modificar archivos personales.
 
 
-### Actualización instalada r17 preparada (18 de noviembre de 2026)
+### Actualización instalada r17 publicada (18 de noviembre de 2026)
 
-- RPM `bypssd-branding-1.1-17` y `bypssd-nextwindow-0.7.0.1-2` compilados sin
-  reconstruir las ISO. Módulos 7.3.3/7.3.4 incluidos; autodetección del USB validado.
-- Chromium usa renderizado software/XWayland solo en Radeon antigua activa;
-  AMDGPU moderno conserva aceleración. Paquetes Mesa/RADV/firmware oficiales.
-- Pruebas: actualización real ARM64 r16→r17, dependencia x64 en contenedor,
-  nueve casos de selección gráfica y captura Chromium con sandbox activo.
-  La corrección visual en AMD física queda pendiente de confirmación.
-- Entrega revisable: `out/updates/r17/`; logs: `out/logs/nextwindow/`.
-- **No publicada en el canal activo**: la revisión automática rechazó crear una
-  clave privada de firma sin autorización explícita. No se ha creado ninguna
-  clave ni se han desactivado verificaciones. Se espera autorización para firmar
-  y publicar los RPM y metadatos preparados.
-- Los equipos deberán confiar una vez en la clave pública y actualizar mediante
-  Discover o zypper; no requieren reinstalación ni otra ISO.
+- Release: https://github.com/bypssd/bypssd-os/releases/tag/updates-20261118-r17
+- Canal RPM propio firmado para ARM64 y x64. Clave pública:
+  `9979 0066 54A3 6906 D207 9972 1F4D 7FF1 32BD 7358`.
+- `bypssd-branding-1.1-17`: modo Chromium software/XWayland solo en Radeon antigua
+  activa; AMDGPU moderno conserva aceleración. Dependencias oficiales Mesa/RADV.
+- `bypssd-nextwindow-0.7.0.1-2`: módulos 7.3.3/7.3.4 y autodetección limitada al
+  USB probado. ARM64 no instala los decodificadores Intel.
+- RPM, SRPM y metadatos firmados; solo la clave pública se publica. La clave
+  privada queda local. Las ISO y los perfiles personales no cambian.
+- Actualizar sin reinstalar, una vez por equipo:
+
+```bash
+sudo rpm --import https://raw.githubusercontent.com/bypssd/bypssd-os/main/repo/keys/BYPSSD-OS-RPM.asc
+sudo zypper refresh
+sudo zypper update bypssd-branding
+```
+
+Después, las siguientes actualizaciones BYPSSD pueden recibirse desde Discover.
+Cerrar por completo y volver a abrir Chromium aplica su nuevo lanzador.
+El fallo general de gráficos al reanudar tras suspensión sigue pendiente de
+identificar la GPU y analizar registros; r17 no se anuncia como reparación de ese fallo.

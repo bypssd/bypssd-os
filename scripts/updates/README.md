@@ -23,13 +23,13 @@ Preparación de actualización, sin reconstruir ISO:
    existente; no genera credenciales. Si falta autorización, no activar el canal.
 4. Publicar los RPM y SRPM firmados como assets de una Release propia. Las ISO
    permanecen fuera de GitHub.
-5. Copiar solo `repodata/` firmados de staging a
+5. Copiar los RPM y los `repodata/` firmados de staging a
    `repo/tumbleweed/{aarch64,x86_64}/updates/repodata/`, y la clave PÚBLICA a
-   `repo/keys/BYPSSD-OS-RPM.asc`. Los RPM se descargan de la Release; no entran en Git.
+   `repo/keys/BYPSSD-OS-RPM.asc`. Los dos RPM propios se sirven junto al catálogo para ser compatibles con ZYpp; las fuentes y copias adicionales están en la Release.
 6. Probar el refresh, las firmas y la actualización desde r16 antes de anunciarla.
 
 `stage-repository.sh` genera un staging nuevo; no modifica el repositorio activo.
-`--baseurl` apunta a los assets de la Release. Los checksums y firmas se generan
+Las ubicaciones RPM son relativas al catálogo, como requiere ZYpp. Los checksums y firmas se generan
 DESPUÉS de firmar los RPM; firmar cambia el archivo y sus hashes.
 
 ## Equipos ya instalados
@@ -37,11 +37,13 @@ DESPUÉS de firmar los RPM; firmar cambia el archivo y sus hashes.
 El repositorio estaba vacío y no había clave propia de confianza. La primera
 actualización necesita importar/verificar la clave pública una vez. No se puede
 mandar una orden remota a equipos sin agente: reciben los paquetes cuando abren
-Discover, actualizan o ejecutan zypper. Después de confiar en la clave:
+Discover, actualizan o ejecutan zypper. Clave publicada: `9979 0066 54A3 6906 D207 9972 1F4D 7FF1 32BD 7358`.
+En cada equipo instalado, una vez:
 
-```
-sudo zypper refresh bypssd-updates
-sudo zypper update --repo bypssd-updates bypssd-branding
+```bash
+sudo rpm --import https://raw.githubusercontent.com/bypssd/bypssd-os/main/repo/keys/BYPSSD-OS-RPM.asc
+sudo zypper refresh
+sudo zypper update bypssd-branding
 ```
 
 No hace falta reinstalar. El nuevo requisito del paquete ya instalado hace que
@@ -49,3 +51,9 @@ los x64 incorporen el controlador. El resto de actualizaciones del sistema
 continúa viniendo del upstream configurado. Una prueba Live no conserva cambios
 al reiniciar; en instalado se mantienen. Cerrar todas las ventanas de Chromium y
 volver a abrirlo aplica el launcher nuevo. Perfiles y archivos personales se conservan.
+
+Publicado: https://github.com/bypssd/bypssd-os/releases/tag/updates-20261118-r17
+
+El fallo de corrupción general al reanudar tras suspensión está pendiente de
+identificar la GPU y analizar registros del kernel. Esta publicación no modifica
+parámetros de energía del kernel ni declara ese fallo reparado.
