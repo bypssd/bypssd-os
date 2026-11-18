@@ -17,7 +17,7 @@ habilita servicios durante su instalación.
 2. Comprobar SHA256. Los RPM experimentales no tienen firma de producción:
    revisarlos antes de aceptar la advertencia de firma de zypper. El canal
    normal BYPSSD conserva `pkg_gpgcheck=1`; no se desactiva.
-3. En BYPSSD del HP: `sudo zypper install ./bypssd-nextwindow-0.7.0.1-1.x86_64.rpm`.
+3. En BYPSSD del HP: `sudo zypper install kernel-default kernel-default-devel ./bypssd-nextwindow-0.7.0.1-1.x86_64.rpm`.
    Instala también las cabeceras y dependencias de compilación/32 bits.
 4. Si el kernel de las cabeceras difiere del activo, reiniciar y arrancar ese
    kernel primero. `sudo bypssd-nextwindow-enable` compila para `uname -r`,

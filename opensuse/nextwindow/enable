@@ -7,6 +7,21 @@ systemctl daemon-reload
 systemctl enable bypssd-nextwindow.service
 systemctl start bypssd-nextwindow.service
 udevadm trigger --subsystem-match=usb --action=add
+udevadm trigger --subsystem-match=usbmisc --action=add
 udevadm trigger --subsystem-match=input --action=change
+udevadm settle
+# modprobe can create the device before the opt-in symlink exists.
+shopt -s nullglob
+for device in /dev/nwfermi[0-9]*; do
+    systemctl start "nwfermi@${device##*/nwfermi}.service"
+done
+for device in /sys/bus/usb/devices/*; do
+    [[ -f $device/idVendor && -f $device/idProduct ]] || continue
+    [[ $(cat "$device/idVendor") == 1926 ]] || continue
+    product=$(cat "$device/idProduct")
+    case "$product" in
+        1846|1875|1878) systemctl start "fwprod-1926-$product.service" ;;
+    esac
+done
 printf '\nControlador cargado. Comprueba la pantalla con: sudo libinput debug-events\n'
 printf 'Si no responde, guarda: sudo bypssd-nextwindow-diagnose\n'

@@ -1,4 +1,5 @@
 [Unit]
+ConditionPathExists=/etc/systemd/system/multi-user.target.wants/bypssd-nextwindow.service
 Description=Exec fwprod (Next Window Touchscreen)
 
 [Service]

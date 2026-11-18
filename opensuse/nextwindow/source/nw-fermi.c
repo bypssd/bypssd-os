@@ -716,8 +716,9 @@ static int fermi_probe(struct usb_interface *interface, const struct usb_device_
     input_set_abs_params(dev->input_dev, ABS_MT_POSITION_X, NW1950_MIN_X, NW1950_MAX_X, 0, 0);
     input_set_abs_params(dev->input_dev, ABS_MT_POSITION_Y, NW1950_MIN_Y, NW1950_MAX_Y, 0, 0);
     retval = input_mt_init_slots(dev->input_dev, 2, INPUT_MT_DIRECT | INPUT_MT_DROP_UNUSED);
-    if (retval)
+    if (retval) {
         goto error;
+    }
 
 	retval = input_register_device(dev->input_dev);
 	if (retval) {
@@ -876,3 +877,4 @@ module_init(usb_fermi_init);
 module_exit(usb_fermi_exit);
 
 MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("NextWindow Fermi touchscreen with BYPSSD libinput direct-touch support");

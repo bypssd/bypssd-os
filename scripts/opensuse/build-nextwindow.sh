@@ -10,7 +10,7 @@ rpmbuild --define "_topdir $root" --define 'debug_package %{nil}' -ba "$root/SPE
 find "$root/RPMS" "$root/SRPMS" -name '*.rpm' -exec cp '{}' "$root/" \;
 rpm -qp --requires "$root"/*.x86_64.rpm
 rpm -qp --scripts "$root"/*.x86_64.rpm
-rpm -i --nodeps "$root"/*.x86_64.rpm
+zypper -n install --allow-unsigned-rpm "$root"/*.x86_64.rpm
 systemd-analyze verify /usr/lib/systemd/system/bypssd-nextwindow.service /usr/lib/systemd/system/nwfermi@1.service /usr/lib/systemd/system/fwprod-*.service
 cd "$root"
 sha256sum ./*.rpm SOURCES/*.tar.gz > SHA256SUMS

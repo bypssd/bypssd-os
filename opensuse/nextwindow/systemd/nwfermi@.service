@@ -1,4 +1,5 @@
 [Unit]
+ConditionPathExists=/etc/systemd/system/multi-user.target.wants/bypssd-nextwindow.service
 Description=NextWindow touchscreen decoder instance %I
 
 [Service]
