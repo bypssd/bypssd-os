@@ -328,3 +328,21 @@ conservan en `out/qemu-r16-installed/` y `out/logs/`.
   el HP físico. No se incorpora aún al canal general de actualizaciones.
 - Instrucciones: `opensuse/nextwindow/README.md`. Instalar el RPM en el equipo ya
   instalado permite probarlo sin reinstalar ni modificar archivos personales.
+
+
+### Actualización instalada r17 preparada (18 de noviembre de 2026)
+
+- RPM `bypssd-branding-1.1-17` y `bypssd-nextwindow-0.7.0.1-2` compilados sin
+  reconstruir las ISO. Módulos 7.3.3/7.3.4 incluidos; autodetección del USB validado.
+- Chromium usa renderizado software/XWayland solo en Radeon antigua activa;
+  AMDGPU moderno conserva aceleración. Paquetes Mesa/RADV/firmware oficiales.
+- Pruebas: actualización real ARM64 r16→r17, dependencia x64 en contenedor,
+  nueve casos de selección gráfica y captura Chromium con sandbox activo.
+  La corrección visual en AMD física queda pendiente de confirmación.
+- Entrega revisable: `out/updates/r17/`; logs: `out/logs/nextwindow/`.
+- **No publicada en el canal activo**: la revisión automática rechazó crear una
+  clave privada de firma sin autorización explícita. No se ha creado ninguna
+  clave ni se han desactivado verificaciones. Se espera autorización para firmar
+  y publicar los RPM y metadatos preparados.
+- Los equipos deberán confiar una vez en la clave pública y actualizar mediante
+  Discover o zypper; no requieren reinstalación ni otra ISO.
