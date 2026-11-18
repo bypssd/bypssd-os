@@ -1,0 +1,10 @@
+#!/bin/bash
+# Read-only diagnostics; intentionally no serial numbers or user data.
+export LC_ALL=C
+printf '\n--- Kernel/session ---\n'; uname -r; uname -m
+printf '\n--- USB ---\n'; lsusb
+printf '\n--- Module ---\n'; modinfo nw-fermi 2>&1; lsmod | grep -E 'nw_fermi|nw-fermi' || true
+printf '\n--- Services ---\n'; systemctl --no-pager --full status bypssd-nextwindow.service 'nwfermi@*.service' 'fwprod-*.service' 2>&1
+printf '\n--- Input ---\n'; libinput list-devices 2>&1
+printf '\n--- Logs ---\n'; journalctl -b --no-pager -n 100 -u bypssd-nextwindow.service -u 'nwfermi@*' -u 'fwprod-*' 2>&1
+printf '\n--- Secure Boot ---\n'; mokutil --sb-state 2>&1

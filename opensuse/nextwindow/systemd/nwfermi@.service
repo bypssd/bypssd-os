@@ -1,0 +1,8 @@
+[Unit]
+Description=NextWindow touchscreen decoder instance %I
+
+[Service]
+Type=forking
+ExecStart=/usr/libexec/bypssd-nextwindow/nwfermi_daemon /daemon /instanceId %I
+Restart=on-failure
+RestartSec=3

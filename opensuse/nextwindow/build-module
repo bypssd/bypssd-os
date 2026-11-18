@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+[[ $EUID == 0 ]] || { echo 'Ejecuta como administrador.' >&2; exit 1; }
+[[ $(uname -m) == x86_64 ]] || { echo 'Los decodificadores originales solo son Intel x86.' >&2; exit 1; }
+if [[ -d /sys/firmware/efi ]] && mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled'; then
+    echo 'Secure Boot activo: este módulo experimental requiere firma con una clave MOK ya inscrita. No se modifica Secure Boot.' >&2
+    exit 1
+fi
+kernel=$(uname -r)
+headers=/lib/modules/$kernel/build
+[[ -f $headers/Makefile ]] || { echo "Faltan las cabeceras de $kernel (kernel-default-devel correspondiente). Si acabas de actualizar el kernel, reinicia primero." >&2; exit 1; }
+work=/var/lib/bypssd-nextwindow/build/$kernel
+install -d -m 0755 "$work"
+cp /usr/src/bypssd-nextwindow/* "$work/"
+make -C "$headers" M="$work" -j2 modules
+install -D -m 0644 "$work/nw-fermi.ko" "/lib/modules/$kernel/updates/bypssd/nw-fermi.ko"
+depmod -a "$kernel"
+modprobe nw-fermi

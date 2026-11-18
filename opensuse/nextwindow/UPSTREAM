@@ -1,0 +1,6 @@
+https://github.com/glorang/nwfermi
+commit 5fda7859cf07d99cd23ac1c842643411d780e7ae
+nw-fermi.c and nwfermi_public.h: GPL-2.0-only (original notices preserved).
+Original nwfermi_daemon and fwprod binaries: NextWindow MIT (LICENSE-NW).
+BYPSSD changes: standard direct-touch type B output; optional RPM integration.
+Original binary decoder ABI remains unchanged. No ARM64 decoder available.

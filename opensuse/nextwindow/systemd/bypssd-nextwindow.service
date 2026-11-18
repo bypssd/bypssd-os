@@ -1,0 +1,13 @@
+[Unit]
+Description=BYPSSD NextWindow: rebuild module for the running kernel
+After=local-fs.target
+ConditionArchitecture=x86-64
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bypssd-nextwindow-build
+RemainAfterExit=yes
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

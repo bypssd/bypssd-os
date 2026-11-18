@@ -1,0 +1,22 @@
+# NW Fermi Rules
+#
+
+# KERNEL!="event[0-9]*", GOTO="nw-fermi-end"
+
+# change nw hidraw devnodes to be world r/w
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1926", MODE="0600", SYMLINK+="nw-fermi-device"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0b8c", ATTRS{idProduct}=="0069", MODE="0600", SYMLINK+="nw-fermi-device"
+# run nwfermi_daemon
+KERNEL=="nwfermi[0-9]*", SYMLINK+="nw-fermi", TAG+="systemd", ENV{SYSTEMD_WANTS}="nwfermi@%n.service"
+# run fwprod
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1926", ATTRS{idProduct}=="1846", TAG+="systemd", ENV{SYSTEMD_WANTS}="fwprod-1926-1846.service"
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1926", ATTRS{idProduct}=="1878", TAG+="systemd", ENV{SYSTEMD_WANTS}="fwprod-1926-1878.service"
+
+# set the fermi input devnod environment for the xorg driver
+ACTION=="add|change", SUBSYSTEM=="input", ATTRS{name}=="Nextwindow Fermi Touchscreen", ENV{NAME}="nextwindow", ENV{ID_INPUT.tags}="nextwindow"
+ACTION=="add", KERNEL=="event*", SUBSYSTEM=="input", ATTRS{name}=="Nextwindow Fermi Touchscreen", SYMLINK+="input/by-path/nw-fermi"
+
+LABEL="nw-fermi-end"
+
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1926", ATTR{idProduct}=="1875", TAG+="systemd", ENV{SYSTEMD_WANTS}+="fwprod-1926-1875.service"
+ACTION=="add|change", SUBSYSTEM=="input", ATTRS{name}=="Nextwindow Fermi Touchscreen", ENV{ID_INPUT}="1", ENV{ID_INPUT_TOUCHSCREEN}="1", ENV{ID_INPUT_MOUSE}="", ENV{ID_INPUT_JOYSTICK}=""

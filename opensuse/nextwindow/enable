@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+[[ $EUID == 0 ]] || { echo 'Ejecuta con sudo.' >&2; exit 1; }
+# No kernel-wide HID blacklist: activate only the USB IDs listed by this module.
+/usr/libexec/bypssd-nextwindow-build
+systemctl daemon-reload
+systemctl enable bypssd-nextwindow.service
+systemctl start bypssd-nextwindow.service
+udevadm trigger --subsystem-match=usb --action=add
+udevadm trigger --subsystem-match=input --action=change
+printf '\nControlador cargado. Comprueba la pantalla con: sudo libinput debug-events\n'
+printf 'Si no responde, guarda: sudo bypssd-nextwindow-diagnose\n'
