@@ -1,0 +1,13 @@
+[Unit]
+Description=BYPSSD validated NextWindow USB autodetection
+After=local-fs.target systemd-udev-trigger.service
+ConditionArchitecture=x86-64
+ConditionPathExists=!/etc/bypssd-nextwindow/disable-auto
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/bypssd-nextwindow-auto
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

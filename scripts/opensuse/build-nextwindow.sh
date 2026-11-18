@@ -2,11 +2,12 @@
 set -euo pipefail
 zypper -n refresh
 zypper -n install --no-recommends rpm-build gcc make curl glibc-32bit libudev1-32bit gzip tar findutils binutils systemd
-if [[ ${NEXTWINDOW_TARGET:-latest} == live-r16 ]]; then
+if [[ ${NEXTWINDOW_TARGET:-latest} == live-r16 || ${NEXTWINDOW_TARGET:-latest} == updates ]]; then
     zypper -n install --no-recommends \
       https://download.opensuse.org/tumbleweed/repo/oss/noarch/kernel-devel-7.3.3-1.1.noarch.rpm \
       https://download.opensuse.org/tumbleweed/repo/oss/x86_64/kernel-default-devel-7.3.3-1.1.x86_64.rpm
-else
+fi
+if [[ ${NEXTWINDOW_TARGET:-latest} != live-r16 ]]; then
     zypper -n install --no-recommends kernel-default-devel kernel-devel
 fi
 root=/workspace/out/nextwindow
@@ -20,7 +21,7 @@ rpm -qp --scripts "$root"/*.x86_64.rpm
 zypper -n install --allow-unsigned-rpm "$root"/*.x86_64.rpm
 systemd-analyze verify /usr/lib/systemd/system/bypssd-nextwindow.service /usr/lib/systemd/system/nwfermi@1.service /usr/lib/systemd/system/fwprod-*.service
 if [[ ${NEXTWINDOW_TARGET:-latest} == live-r16 ]]; then
-    module="$root/nw-fermi-built.ko"
+    module="$root/compiled-modules/7.3.3-1-default/nw-fermi.ko"
     test -f "$module"
     cp "$module" "$root/nw-fermi-7.3.3-1-default.ko"
     modinfo "$root/nw-fermi-7.3.3-1-default.ko" | tee "$root/module-info.txt"

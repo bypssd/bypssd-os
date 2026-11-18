@@ -2,7 +2,7 @@
 %global __requires_exclude ^qt6qmlimport[(]calamares[.]slideshow[.]1[)]$
 Name: bypssd-branding
 Version: 1.1
-Release: 16
+Release: 17
 Summary: Escritorio BYPSSD OS Renacer
 License: GPL-2.0-or-later AND GPL-3.0-or-later AND LGPL-2.0-or-later AND LicenseRef-BYPSSD-Artwork
 URL: https://bypssd.com
@@ -10,6 +10,12 @@ Vendor: BYPSSD Informática Retro
 Distribution: BYPSSD OS Renacer
 Source0: bypssd-branding-1.1.tar.gz
 BuildArch: noarch
+Requires: python3
+Requires: Mesa-dri
+Requires: libvulkan_radeon
+Requires: kernel-firmware-amdgpu
+Requires: kernel-firmware-radeon
+Requires: (bypssd-nextwindow >= 0.7.0.1-2 if kernel-default(x86-64))
 Provides: plasma6-branding = 6.8.2
 Provides: sddm-branding = 0.21.0
 Provides: sddm-qt6-branding = 0.21.0
@@ -49,3 +55,6 @@ cp -a usr %{buildroot}/
 /usr/libexec/bypssd-installed-cleanup
 
 /usr/libexec/bypssd-hide-admin-launchers
+
+/usr/libexec/bypssd-chromium
+/usr/local/share/applications/chromium-browser.desktop

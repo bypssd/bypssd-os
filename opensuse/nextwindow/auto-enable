@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+[[ ! -e /etc/bypssd-nextwindow/disable-auto ]] || exit 0
+[[ $(uname -m) == x86_64 ]] || exit 0
+# Only the physically validated USB model is activated automatically.
+shopt -s nullglob
+for device in /sys/bus/usb/devices/*; do
+    [[ -r $device/idVendor && -r $device/idProduct ]] || continue
+    if [[ $(cat "$device/idVendor") == 1926 && $(cat "$device/idProduct") == 0dbe ]]; then
+        exec /usr/sbin/bypssd-nextwindow-enable
+    fi
+done
+printf 'No hay una pantalla NextWindow validada conectada; no se activa el controlador.\n'

@@ -1,0 +1,26 @@
+[Desktop Entry]
+Version=1.0
+Name=Chromium
+GenericName=Web Browser
+GenericName[es]=Navegador web
+Comment=Browse the web
+Comment[es]=Navegar por Internet
+Exec=/usr/libexec/bypssd-chromium %U
+TryExec=/usr/bin/chromium
+Terminal=false
+Type=Application
+Icon=chromium
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Name[es]=Nueva ventana
+Exec=/usr/libexec/bypssd-chromium --new-window %U
+
+[Desktop Action new-private-window]
+Name=New Incognito Window
+Name[es]=Nueva ventana de incógnito
+Exec=/usr/libexec/bypssd-chromium --incognito %U

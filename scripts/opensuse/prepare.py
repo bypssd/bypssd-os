@@ -15,6 +15,8 @@ def write(dst,text):
 copy(r/'opensuse/bypssd-efi-config',payload/'usr/libexec/bypssd-efi-config');(payload/'usr/libexec/bypssd-efi-config').chmod(0o755)
 copy(r/'opensuse/bypssd-hide-admin-launchers',payload/'usr/libexec/bypssd-hide-admin-launchers');(payload/'usr/libexec/bypssd-hide-admin-launchers').chmod(0o755)
 copy(r/'opensuse/bypssd-installed-cleanup',payload/'usr/libexec/bypssd-installed-cleanup');(payload/'usr/libexec/bypssd-installed-cleanup').chmod(0o755)
+copy(r/'opensuse/graphics/chromium',payload/'usr/libexec/bypssd-chromium');(payload/'usr/libexec/bypssd-chromium').chmod(0o755)
+copy(r/'opensuse/graphics/chromium-browser.desktop',payload/'usr/local/share/applications/chromium-browser.desktop')
 copy(r/'assets',share/'bypssd');copy(r/'branding/start',share/'bypssd/start');copy(r/'branding/browser',share/'bypssd/browser')
 copy(r/'branding/look-and-feel',share/'plasma/look-and-feel/com.bypssd.desktop')
 p=share/'plasma/look-and-feel/com.bypssd.desktop/contents/defaults';p.write_text(p.read_text().replace('widgetStyle=BYPSSD','widgetStyle=Breeze'))

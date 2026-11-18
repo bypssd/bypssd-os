@@ -1,0 +1,35 @@
+#!/usr/bin/python3
+"""Launch upstream Chromium; software rendering only for active legacy Radeon."""
+import os
+from pathlib import Path
+import sys
+
+def legacy_radeon(root=Path('/sys/class/drm')):
+    for card in root.glob('card[0-9]*'):
+        if not card.name[4:].isdigit():
+            continue
+        driver = card/'device/driver'
+        try:
+            if driver.resolve(strict=True).name != 'radeon':
+                continue
+            boot = card/'device/boot_vga'
+            primary = boot.is_file() and boot.read_text().strip() == '1'
+            connected = any(p.read_text().strip() == 'enabled' for p in root.glob(card.name+'-*/enabled'))
+            if primary or connected:
+                return True
+        except OSError:
+            continue
+    return False
+
+def arguments(argv, root=Path('/sys/class/drm'), mode='auto'):
+    if mode not in ('auto', 'software', 'native'):
+        raise ValueError('BYPSSD_CHROMIUM_MODE debe ser auto, software o native')
+    fallback = mode == 'software' or (mode == 'auto' and legacy_radeon(root))
+    if fallback:
+        # Last wins: callers cannot accidentally turn hardware compositing back on.
+        return [*argv, '--ozone-platform=x11', '--disable-gpu']
+    return argv
+
+if __name__ == '__main__':
+    args = arguments(sys.argv[1:], mode=os.getenv('BYPSSD_CHROMIUM_MODE','auto'))
+    os.execv('/usr/bin/chromium', ['chromium', *args])

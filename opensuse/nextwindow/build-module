@@ -7,12 +7,17 @@ if [[ -d /sys/firmware/efi ]] && mokutil --sb-state 2>/dev/null | grep -q 'Secur
     exit 1
 fi
 kernel=$(uname -r)
-headers=/lib/modules/$kernel/build
-[[ -f $headers/Makefile ]] || { echo "Faltan las cabeceras de $kernel (kernel-default-devel correspondiente). Si acabas de actualizar el kernel, reinicia primero." >&2; exit 1; }
-work=/var/lib/bypssd-nextwindow/build/$kernel
-install -d -m 0755 "$work"
-cp /usr/src/bypssd-nextwindow/* "$work/"
-make -C "$headers" M="$work" -j2 modules
-install -D -m 0644 "$work/nw-fermi.ko" "/lib/modules/$kernel/updates/bypssd/nw-fermi.ko"
+bundled=/usr/lib/bypssd-nextwindow/modules/$kernel/nw-fermi.ko
+if [[ -f $bundled ]] && [[ $(modinfo -F vermagic "$bundled") == "$kernel "* ]]; then
+    install -D -m 0644 "$bundled" "/lib/modules/$kernel/updates/bypssd/nw-fermi.ko"
+else
+    headers=/lib/modules/$kernel/build
+    [[ -f $headers/Makefile ]] || { echo "Faltan cabeceras exactas para $kernel; el módulo no está precompilado para esta versión." >&2; exit 1; }
+    work=/var/lib/bypssd-nextwindow/build/$kernel
+    install -d -m 0755 "$work"
+    cp /usr/src/bypssd-nextwindow/* "$work/"
+    make -C "$headers" M="$work" -j2 modules
+    install -D -m 0644 "$work/nw-fermi.ko" "/lib/modules/$kernel/updates/bypssd/nw-fermi.ko"
+fi
 depmod -a "$kernel"
 modprobe nw-fermi
