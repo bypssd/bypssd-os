@@ -13,7 +13,6 @@ test -s "$branding";test -s "$touch"
 for arch in aarch64 x86_64; do cp "$branding" "$staging/$arch/";done
 cp "$touch" "$staging/x86_64/"
 for arch in aarch64 x86_64; do
-    createrepo_c --no-database --baseurl "$asset_base/" "$staging/$arch"
-    python3 scripts/updates/absolute-locations.py "$staging/$arch"
+    createrepo_c --no-database "$staging/$arch"
 done
 printf 'STAGED ONLY: requiere firma de RPM y metadatos antes de publicar en el canal.\n'
