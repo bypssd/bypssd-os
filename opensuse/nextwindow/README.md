@@ -11,6 +11,13 @@ sesión KDE/SDDM. El decodificador original Intel 32 bits se conserva con su
 licencia MIT. No es compatible con ARM64. El paquete no activa el módulo ni
 habilita servicios durante su instalación.
 
+## Paquete experimental comprobado
+
+Paquete: https://github.com/bypssd/bypssd-os/releases/tag/nextwindow-0.7.0.1-r1-experimental
+
+Compilación validada: Actions 44262462023, cabeceras 7.3.4-1-default, instalación
+real de dependencias RPM, ambos decodificadores ELF32 y unidades systemd correctas.
+
 ## Instalación sin reinstalar
 
 1. Descargar el RPM y su SHA256 del artefacto del workflow NextWindow.
