@@ -309,3 +309,22 @@ conservan en `out/qemu-r16-installed/` y `out/logs/`.
   entrega de Actions; se conservan logs y paquetes BYPSSD. Parallels no se utilizó.
 - Pruebas realizadas en QEMU; la validación de hardware físico y Secure Boot
   continúa pendiente.
+
+
+### NextWindow opcional para HP TouchSmart (18 de noviembre de 2026)
+
+- Se ha añadido `opensuse/nextwindow/`: fuentes GPL fijadas al commit upstream
+  `5fda7859cf07d99cd23ac1c842643411d780e7ae`, decodificadores originales Intel
+  de 32 bits con licencia NextWindow MIT, integración RPM y servicios optativos.
+- El módulo produce eventos direct-touch multitáctiles tipo B para libinput/KDE;
+  no instala el driver Xorg antiguo ni cambia la sesión. No hay versión ARM64.
+- El workflow `nextwindow.yml` comprueba compilación real con cabeceras
+  Tumbleweed, carga de ambos ELF32, dependencias RPM y unidades systemd.
+- El módulo se compila para el kernel arrancado al activar y en próximos
+  arranques. Requiere cabeceras coincidentes. Secure Boot activo requiere un
+  procedimiento de firma aparte: el paquete no cambia firmware ni genera claves.
+- No modifica las ISO r16 entregadas ni habilita el controlador en otros equipos.
+  El paquete es experimental: falta confirmar USB VID/PID y respuesta táctil en
+  el HP físico. No se incorpora aún al canal general de actualizaciones.
+- Instrucciones: `opensuse/nextwindow/README.md`. Instalar el RPM en el equipo ya
+  instalado permite probarlo sin reinstalar ni modificar archivos personales.
