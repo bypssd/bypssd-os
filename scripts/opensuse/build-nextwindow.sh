@@ -20,8 +20,8 @@ rpm -qp --scripts "$root"/*.x86_64.rpm
 zypper -n install --allow-unsigned-rpm "$root"/*.x86_64.rpm
 systemd-analyze verify /usr/lib/systemd/system/bypssd-nextwindow.service /usr/lib/systemd/system/nwfermi@1.service /usr/lib/systemd/system/fwprod-*.service
 if [[ ${NEXTWINDOW_TARGET:-latest} == live-r16 ]]; then
-    module=$(find "$root/BUILD" -name nw-fermi.ko -print -quit)
-    test -n "$module"
+    module="$root/nw-fermi-built.ko"
+    test -f "$module"
     cp "$module" "$root/nw-fermi-7.3.3-1-default.ko"
     modinfo "$root/nw-fermi-7.3.3-1-default.ko" | tee "$root/module-info.txt"
     modinfo -F vermagic "$module" | grep -q '^7.3.3-1-default '

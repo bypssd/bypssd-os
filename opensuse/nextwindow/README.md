@@ -36,6 +36,24 @@ Secure Boot: se rechaza la activación de módulos sin firma cuando está activo
 No se generan claves ni se modifica el firmware. La firma/inscripción de una
 clave MOK existente requiere un procedimiento aparte antes de usarlo así.
 
+## Prueba temporal en el Live r16 x64
+
+La ISO r16 arranca `7.3.3-1-default`. Instalar las cabeceras más recientes no
+proporciona las de ese kernel: reiniciar el Live tampoco lo cambia. Si ya está
+instalado este RPM, para obtener las cabeceras exactas oficiales:
+
+```bash
+sudo zypper install --oldpackage \
+  https://download.opensuse.org/tumbleweed/repo/oss/noarch/kernel-devel-7.3.3-1.1.noarch.rpm \
+  https://download.opensuse.org/tumbleweed/repo/oss/x86_64/kernel-default-devel-7.3.3-1.1.x86_64.rpm
+sudo bypssd-nextwindow-enable
+```
+
+Ejecutar solo si `uname -r` devuelve `7.3.3-1-default` y la arquitectura es x86_64.
+No reiniciar: los cambios Live son temporales. Estas URL son de upstream y pueden
+caducar cuando rote el repositorio. El workflow `target=live-r16` conserva el
+módulo precompilado y comprueba su vermagic exacto para poder distribuirlo aparte.
+
 ## Actualizaciones y diagnóstico
 
 El servicio compila de nuevo para el kernel arrancado. Deben conservarse gcc,

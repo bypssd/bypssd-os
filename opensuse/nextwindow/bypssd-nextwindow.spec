@@ -40,6 +40,7 @@ no HID blacklist, no Secure Boot changes. Hardware validation is required.
 headers=$(find /usr/src/linux-*-obj/x86_64/default -maxdepth 0 -type d | sort -V | tail -1)
 test -n "$headers"
 make -C "$headers" M="$PWD/source" -j2 modules
+cp source/nw-fermi.ko %{_topdir}/nw-fermi-built.ko
 /lib/ld-linux.so.2 --list ./nwfermi_daemon
 ln -s /usr/lib/libudev.so.1 libudev.so.0
 /lib/ld-linux.so.2 --library-path "$PWD" --list ./fwprod
