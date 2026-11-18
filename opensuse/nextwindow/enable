@@ -2,6 +2,7 @@
 set -euo pipefail
 [[ $EUID == 0 ]] || { echo 'Ejecuta con sudo.' >&2; exit 1; }
 # No kernel-wide HID blacklist: activate only the USB IDs listed by this module.
+udevadm control --reload-rules
 /usr/libexec/bypssd-nextwindow-build
 systemctl daemon-reload
 systemctl enable bypssd-nextwindow.service
