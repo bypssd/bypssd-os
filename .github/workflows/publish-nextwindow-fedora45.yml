@@ -1,0 +1,34 @@
+name: Publicar RPM NextWindow Fedora 45
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        required: true
+        default: '45046125658'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar compilación validada
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          result=$(gh api repos/bypssd/bypssd-os/actions/runs/${{ inputs.source_run }} --jq .conclusion)
+          test "$result" = success
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.source_run }}
+          name: nextwindow-fedora45-x86_64
+          path: incoming
+      - name: Verificar hashes y publicar únicamente RPM y fuentes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          (cd incoming && sha256sum -c SHA256SUMS)
+          revision=$(gh api repos/bypssd/bypssd-os/actions/runs/${{ inputs.source_run }} --jq .head_sha)
+          gh release create nextwindow-fedora45-0.7.0.1-3 incoming/*.rpm incoming/kernels.json incoming/SHA256SUMS --target "$revision" --prerelease --title 'NextWindow · Fedora 45 x64 · tres kernels estables' --notes-file fedora/nextwindow/RELEASE.md
