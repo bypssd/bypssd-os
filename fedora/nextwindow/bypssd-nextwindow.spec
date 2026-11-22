@@ -21,7 +21,7 @@ Requires:       systemd-libs(x86-32)
 Requires:       kmod
 Requires:       mokutil
 Requires:       usbutils
-Requires:       libinput-tools
+Requires:       libinput-utils
 Requires:       systemd
 %define _build_id_links none
 %define __requires_exclude ^libudev\\.so\\.0.*$
